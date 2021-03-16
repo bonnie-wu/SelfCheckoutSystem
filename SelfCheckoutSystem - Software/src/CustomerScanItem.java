@@ -87,14 +87,14 @@ public class CustomerScanItem {
 	/*
 	 * 	Places a given item in bagging area
 	 */
-	public void placeItemInBagging(BarcodedItem item) throws OverloadException {
+	public void placeItemInBagging(BarcodedItem item) throws OverloadException{
 		if(item == null)
 			throw new SimulationException("Can't place null item in bagging area.");
 		
 		if(baggingScale.isDisabled())
 			throw new SimulationException("Bagging are scale is disabled, item not added.");
 
-		if(scannedItemWeights() < baggingScale.getCurrentWeight())
+		if(scannedItemWeights() < baggingScale.getCurrentWeight() + item.getWeight())
 			throw new SimulationException("Unidentified object in bagging area, please remove.");
 		
 		baggingScale.add(item);

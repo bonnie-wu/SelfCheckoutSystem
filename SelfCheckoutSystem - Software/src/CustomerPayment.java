@@ -24,6 +24,9 @@ public class CustomerPayment {
 		}
 		this.scannedItems = scannedItems;
 		this.station = station;
+		
+		total = BigDecimal.valueOf(0);
+		total();
 	}
 
 	// calculate the total of everything in the arrayList

@@ -8,10 +8,19 @@ import org.lsmr.selfcheckout.Banknote;
 import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
 import org.lsmr.selfcheckout.Coin;
+import org.lsmr.selfcheckout.devices.AbstractDevice;
+import org.lsmr.selfcheckout.devices.BanknoteValidator;
+import org.lsmr.selfcheckout.devices.BarcodeScanner;
+import org.lsmr.selfcheckout.devices.CoinValidator;
 import org.lsmr.selfcheckout.devices.DisabledException;
-import org.lsmr.selfcheckout.devices.OverloadException;
+import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.devices.listeners.AbstractDeviceListener;
+import org.lsmr.selfcheckout.devices.listeners.BanknoteValidatorListener;
+import org.lsmr.selfcheckout.devices.listeners.BarcodeScannerListener;
+import org.lsmr.selfcheckout.devices.listeners.CoinValidatorListener;
+import org.lsmr.selfcheckout.devices.listeners.ElectronicScaleListener;
 import org.lsmr.selfcheckout.external.ProductDatabases;
 import org.lsmr.selfcheckout.products.BarcodedProduct;
 import org.lsmr.selfcheckout.products.Product;
@@ -25,9 +34,24 @@ public class SoftwareMain {
 	public static CustomerPayment customerPayment;
 	
 	public static void main(String[] args) {
+		System.out.println("Starting application...\n");
+		
+		
 		initialize();
 		
+		BarcodedItem cheeseSticks = new BarcodedItem(new Barcode("012345"), 500);
+		BarcodedItem chickenNuggets = new BarcodedItem(new Barcode("012346"), 2000);
 		
+		ScanMain(cheeseSticks);
+		ScanHeld(chickenNuggets);
+		
+		Pay(new Banknote(5, Currency.getInstance(Locale.CANADA)));
+		Pay(new Coin(BigDecimal.valueOf(0.05), Currency.getInstance(Locale.CANADA)));
+		
+		Bag(cheeseSticks);
+		Bag(chickenNuggets);
+		
+		System.out.println("\nEnding application...");
 	}
 	
 	public static void Pay(Coin coin) {
@@ -60,7 +84,7 @@ public class SoftwareMain {
 		try {
 			customerScanItem.placeItemInBagging(item);
 		}
-		catch(OverloadException ex) {
+		catch(Exception ex) {
 			ex.printStackTrace();
 		}
 	}
@@ -79,8 +103,10 @@ public class SoftwareMain {
 		
 		station = new SelfCheckoutStation(currency, banknoteDenominations, coinDenominations, scaleMaximumWeight, scaleSensitivity);
 		
-		BarcodedItem itemList[] = {		new BarcodedItem(new Barcode("012345"), 500),	
-										new BarcodedItem(new Barcode("012346"), 2000)
+		initializeListeners(station.mainScanner, station.handheldScanner, station.coinValidator, station.baggingArea, station.banknoteValidator);
+		
+		BarcodedItem itemList[] = {		/*new BarcodedItem(new Barcode("012345"), 500),	
+										new BarcodedItem(new Barcode("012346"), 2000)*/
 								  };				//Only fill for testing purposes (alternative to populateItems() within initialize)
 		BarcodedProduct productList[] = {	new BarcodedProduct(new Barcode("012345"), "Cheese sticks", BigDecimal.valueOf(2.95)),
 											new BarcodedProduct(new Barcode("012346"), "Chicken nuggets", BigDecimal.valueOf(10.99)),
@@ -95,6 +121,80 @@ public class SoftwareMain {
 			customerScanItem = new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, previouslyScannedItems);
 		
 		customerPayment = new CustomerPayment(convertItemToProduct(previouslyScannedItems), station);
+	}
+	
+	private static void initializeListeners(BarcodeScanner mainScanner, BarcodeScanner heldScanner, CoinValidator coinValidator, 
+									 ElectronicScale baggingArea, BanknoteValidator banknoteValidator) {
+		mainScanner.register(new BarcodeScannerListener(){
+			@Override
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
+				System.out.println("Main Scanner, scanned barcode: "+barcode.toString());
+			}
+		});
+		
+		heldScanner.register(new BarcodeScannerListener(){
+			@Override
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
+				System.out.println("Handheld Scanner, scanned barcode: "+barcode.toString());
+			}
+		});
+		
+		coinValidator.register(new CoinValidatorListener(){
+			@Override
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void validCoinDetected(CoinValidator validator, BigDecimal value) {
+				System.out.println("Valid Coin detected with value of: "+value);
+			}
+			@Override
+			public void invalidCoinDetected(CoinValidator validator) {
+				System.out.println("Invalid Coin detected");
+			}
+		});
+		
+		banknoteValidator.register(new BanknoteValidatorListener(){
+			@Override
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void validBanknoteDetected(BanknoteValidator validator, Currency currency, int value) {
+				System.out.println("Valid Banknote detected with value of: "+value);
+			}
+			@Override
+			public void invalidBanknoteDetected(BanknoteValidator validator) {
+				System.out.println("Invalid Banknote detected");
+			}
+		});
+		
+		baggingArea.register(new ElectronicScaleListener(){
+			@Override
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			@Override
+			public void weightChanged(ElectronicScale scale, double weightInGrams) {
+				System.out.println("Weight in bagging area is now: "+weightInGrams);
+			}
+			@Override
+			public void overload(ElectronicScale scale) {
+				System.out.println("Weight in bagging area is overloading");
+			}
+			@Override
+			public void outOfOverload(ElectronicScale scale) {
+				System.out.println("Weight in bagging area is no longer overloading");
+			}
+		});
 	}
 	
 	public static void populateItems(ArrayList<BarcodedItem> list) {
