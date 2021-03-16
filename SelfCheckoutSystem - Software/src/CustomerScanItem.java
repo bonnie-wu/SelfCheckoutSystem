@@ -9,10 +9,14 @@ import org.lsmr.selfcheckout.devices.SimulationException;
 
 public class CustomerScanItem {
 	
+	//Initializing global variables used to scan items or place items in bagging area.
 	private ArrayList<Item> scannedItems;
 	private BarcodeScanner scanner;
 	private ElectronicScale baggingScale;
 	
+	/*
+	 * 	Constructor with previously scanned items provided.
+	 */
 	CustomerScanItem(BarcodeScanner scanner, ElectronicScale baggingScale, ArrayList<Item> previouslyScannedItems){
 		if(scanner == null)
 			throw new SimulationException("Barcode scanner is null");
@@ -31,6 +35,9 @@ public class CustomerScanItem {
 		scannedItems = previouslyScannedItems;
 	}
 	
+	/*
+	 * 	Constructor without previously scanned items provided.
+	 */
 	CustomerScanItem(BarcodeScanner scanner, ElectronicScale baggingScale){
 		if(scanner == null)
 			throw new SimulationException("Barcode scanner is null");
@@ -43,6 +50,9 @@ public class CustomerScanItem {
 		scannedItems = new ArrayList<Item>();
 	}
 	
+	/*
+	 * 	Scans a given item
+	 */
 	public void scanItem(Item item) {
 		if(item == null)
 			throw new SimulationException("Can't scan item, item is null.");
@@ -54,6 +64,9 @@ public class CustomerScanItem {
 		scannedItems.add(item);
 	}
 	
+	/*
+	 * 	Places a given item in bagging area
+	 */
 	public void placeItemInBagging(Item item) throws OverloadException {
 		if(item == null)
 			throw new SimulationException("Can't place null item in bagging area.");
@@ -67,6 +80,9 @@ public class CustomerScanItem {
 		baggingScale.add(item);
 	}
 	
+	/*
+	 * 	Removes a scanned item
+	 */
 	public void removeScannedItem(Item item) {
 		if(item == null)
 			throw new SimulationException("Can't remove item, item is null.");
@@ -74,6 +90,9 @@ public class CustomerScanItem {
 		scannedItems.remove(item);
 	}
 	
+	/*
+	 * 	Removes a given item from bagging area
+	 */
 	public void removeItemFromBagging(Item item) throws OverloadException {
 		if(item == null)
 			throw new SimulationException("Can't remove null item from bagging area.");
@@ -84,6 +103,9 @@ public class CustomerScanItem {
 		baggingScale.remove(item);
 	}
 	
+	/*
+	 * 	Clears all items from the bagging area
+	 */
 	public void clearBaggedItems() throws OverloadException {
 		for(Item item : scannedItems) {
 			try {
@@ -96,10 +118,16 @@ public class CustomerScanItem {
 			throw new SimulationException("Unpaid item is in bagging area");
 	}
 	
+	/*
+	 * 	Clears all items that have been scanned
+	 */
 	public void clearScannedItems() {
 		scannedItems.clear();
 	}
 	
+	/*
+	 * 	Returns the total weight of all the scanned items
+	 */
 	private double scannedItemWeights() {
 		double total = 0;
 		
