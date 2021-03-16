@@ -23,7 +23,6 @@ import org.lsmr.selfcheckout.devices.listeners.CoinValidatorListener;
 import org.lsmr.selfcheckout.devices.listeners.ElectronicScaleListener;
 import org.lsmr.selfcheckout.external.ProductDatabases;
 import org.lsmr.selfcheckout.products.BarcodedProduct;
-import org.lsmr.selfcheckout.products.Product;
 
 public class SoftwareMain {
 	
@@ -37,16 +36,21 @@ public class SoftwareMain {
 		initialize();
 	}
 	
-	SoftwareMain(SelfCheckoutStation station, ArrayList<BarcodedProduct> scannedItems){
+	SoftwareMain(SelfCheckoutStation station, ArrayList<BarcodedItem> previouslyScannedItems){
 		if(station == null)
 			throw new SimulationException("Station is null");
 		
+		if(previouslyScannedItems == null)
+			throw new SimulationException("previouslyScannedItems is null");
+			
 		this.station = station;
 		customerScanItem = new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea);
-		customerPayment = new CustomerPayment(scannedItems, station);
+		customerPayment = new CustomerPayment(new ArrayList<BarcodedProduct>(), station);
 	}
 
 	public void Pay(Coin coin) {
+		customerPayment.updateScannedProducts(convertItemToProduct(customerScanItem.getScannedItems()));
+		
 		try {
 			customerPayment.PayCoin(coin);
 		}
@@ -56,6 +60,8 @@ public class SoftwareMain {
 	}
 	
 	public void Pay(Banknote banknote) {
+		customerPayment.updateScannedProducts(convertItemToProduct(customerScanItem.getScannedItems()));
+		
 		try {
 			customerPayment.PayBanknote(banknote);
 		}
@@ -97,8 +103,8 @@ public class SoftwareMain {
 		
 		//initializeListeners(station.mainScanner, station.handheldScanner, station.coinValidator, station.baggingArea, station.banknoteValidator);
 		
-		BarcodedItem itemList[] = {		/*new BarcodedItem(new Barcode("012345"), 500),	
-										new BarcodedItem(new Barcode("012346"), 2000)*/
+		BarcodedItem itemList[] = {		new BarcodedItem(new Barcode("012345"), 500),	
+										new BarcodedItem(new Barcode("012346"), 2000)
 								  };				//Only fill for testing purposes (alternative to populateItems() within initialize)
 		BarcodedProduct productList[] = {	new BarcodedProduct(new Barcode("012345"), "Cheese sticks", BigDecimal.valueOf(2.95)),
 											new BarcodedProduct(new Barcode("012346"), "Chicken nuggets", BigDecimal.valueOf(10.99)),

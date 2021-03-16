@@ -157,4 +157,8 @@ public class CustomerScanItem {
 		
 		return total;
 	}
+	
+	public ArrayList<BarcodedItem> getScannedItems(){
+		return scannedItems;
+	}
 }
