@@ -32,6 +32,10 @@ public class SoftwareMain {
 	public SelfCheckoutStation station;
 	public CustomerScanItem customerScanItem;
 	public CustomerPayment customerPayment;
+	
+	SoftwareMain(){
+		initialize();
+	}
 
 	public void Pay(Coin coin) {
 		try {
@@ -82,7 +86,7 @@ public class SoftwareMain {
 		
 		station = new SelfCheckoutStation(currency, banknoteDenominations, coinDenominations, scaleMaximumWeight, scaleSensitivity);
 		
-		initializeListeners(station.mainScanner, station.handheldScanner, station.coinValidator, station.baggingArea, station.banknoteValidator);
+		//initializeListeners(station.mainScanner, station.handheldScanner, station.coinValidator, station.baggingArea, station.banknoteValidator);
 		
 		BarcodedItem itemList[] = {		/*new BarcodedItem(new Barcode("012345"), 500),	
 										new BarcodedItem(new Barcode("012346"), 2000)*/
