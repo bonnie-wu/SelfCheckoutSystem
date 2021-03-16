@@ -104,72 +104,53 @@ public class SoftwareMain {
 	
 	private void initializeListeners(BarcodeScanner mainScanner, BarcodeScanner heldScanner, CoinValidator coinValidator, 
 									 ElectronicScale baggingArea, BanknoteValidator banknoteValidator) {
-		mainScanner.register(new BarcodeScannerListener(){
-			@Override
+		mainScanner.register(new BarcodeScannerListener() {
 			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
 				System.out.println("Main Scanner, scanned barcode: "+barcode.toString());
 			}
 		});
 		
 		heldScanner.register(new BarcodeScannerListener(){
-			@Override
 			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
 				System.out.println("Handheld Scanner, scanned barcode: "+barcode.toString());
 			}
 		});
 		
 		coinValidator.register(new CoinValidatorListener(){
-			@Override
 			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void validCoinDetected(CoinValidator validator, BigDecimal value) {
 				System.out.println("Valid Coin detected with value of: "+value);
 			}
-			@Override
 			public void invalidCoinDetected(CoinValidator validator) {
 				System.out.println("Invalid Coin detected");
 			}
 		});
 		
 		banknoteValidator.register(new BanknoteValidatorListener(){
-			@Override
 			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void validBanknoteDetected(BanknoteValidator validator, Currency currency, int value) {
 				System.out.println("Valid Banknote detected with value of: "+value);
 			}
-			@Override
 			public void invalidBanknoteDetected(BanknoteValidator validator) {
 				System.out.println("Invalid Banknote detected");
 			}
 		});
 		
 		baggingArea.register(new ElectronicScaleListener(){
-			@Override
 			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
-			@Override
 			public void weightChanged(ElectronicScale scale, double weightInGrams) {
 				System.out.println("Weight in bagging area is now: "+weightInGrams);
 			}
-			@Override
 			public void overload(ElectronicScale scale) {
 				System.out.println("Weight in bagging area is overloading");
 			}
-			@Override
 			public void outOfOverload(ElectronicScale scale) {
 				System.out.println("Weight in bagging area is no longer overloading");
 			}
