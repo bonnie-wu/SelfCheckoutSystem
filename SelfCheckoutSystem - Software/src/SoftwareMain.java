@@ -27,34 +27,13 @@ import org.lsmr.selfcheckout.products.Product;
 
 public class SoftwareMain {
 	
-	public static ArrayList<BarcodedItem> previouslyScannedItems;
-	public static ProductDatabases productDatabase;
-	public static SelfCheckoutStation station;
-	public static CustomerScanItem customerScanItem;
-	public static CustomerPayment customerPayment;
-	
-	public static void main(String[] args) {
-		System.out.println("Starting application...\n");
-		
-		
-		initialize();
-		
-		BarcodedItem cheeseSticks = new BarcodedItem(new Barcode("012345"), 500);
-		BarcodedItem chickenNuggets = new BarcodedItem(new Barcode("012346"), 2000);
-		
-		ScanMain(cheeseSticks);
-		ScanHeld(chickenNuggets);
-		
-		Pay(new Banknote(5, Currency.getInstance(Locale.CANADA)));
-		Pay(new Coin(BigDecimal.valueOf(0.05), Currency.getInstance(Locale.CANADA)));
-		
-		Bag(cheeseSticks);
-		Bag(chickenNuggets);
-		
-		System.out.println("\nEnding application...");
-	}
-	
-	public static void Pay(Coin coin) {
+	public ArrayList<BarcodedItem> previouslyScannedItems;
+	public ProductDatabases productDatabase;
+	public SelfCheckoutStation station;
+	public CustomerScanItem customerScanItem;
+	public CustomerPayment customerPayment;
+
+	public void Pay(Coin coin) {
 		try {
 			customerPayment.PayCoin(coin);
 		}
@@ -63,7 +42,7 @@ public class SoftwareMain {
 		}
 	}
 	
-	public static void Pay(Banknote banknote) {
+	public void Pay(Banknote banknote) {
 		try {
 			customerPayment.PayBanknote(banknote);
 		}
@@ -72,15 +51,15 @@ public class SoftwareMain {
 		}
 	}
 	
-	public static void ScanMain(BarcodedItem item) {
+	public void ScanMain(BarcodedItem item) {
 		customerScanItem.scanItemMain(item);
 	}
 	
-	public static void ScanHeld(BarcodedItem item) {
+	public void ScanHeld(BarcodedItem item) {
 		customerScanItem.scanItemHeld(item);
 	}
 	
-	public static void Bag(BarcodedItem item) {
+	public void Bag(BarcodedItem item) {
 		try {
 			customerScanItem.placeItemInBagging(item);
 		}
@@ -89,7 +68,7 @@ public class SoftwareMain {
 		}
 	}
 	
-	private static void initialize() {
+	public void initialize() {
 		Currency currency = Currency.getInstance(Locale.CANADA);
 		int[] banknoteDenominations = {5, 10, 20, 50, 100};
 		BigDecimal[] coinDenominations = {	BigDecimal.valueOf(0.05), 
@@ -123,7 +102,7 @@ public class SoftwareMain {
 		customerPayment = new CustomerPayment(convertItemToProduct(previouslyScannedItems), station);
 	}
 	
-	private static void initializeListeners(BarcodeScanner mainScanner, BarcodeScanner heldScanner, CoinValidator coinValidator, 
+	private void initializeListeners(BarcodeScanner mainScanner, BarcodeScanner heldScanner, CoinValidator coinValidator, 
 									 ElectronicScale baggingArea, BanknoteValidator banknoteValidator) {
 		mainScanner.register(new BarcodeScannerListener(){
 			@Override
@@ -197,7 +176,7 @@ public class SoftwareMain {
 		});
 	}
 	
-	public static void populateItems(ArrayList<BarcodedItem> list) {
+	public void populateItems(ArrayList<BarcodedItem> list) {
 		previouslyScannedItems.clear();
 		
 		for(BarcodedItem item : list) {
@@ -205,7 +184,7 @@ public class SoftwareMain {
 		}
 	}
 	
-	public static void populateDatabase(ArrayList<BarcodedProduct> list) {
+	public void populateDatabase(ArrayList<BarcodedProduct> list) {
 		productDatabase.BARCODED_PRODUCT_DATABASE.clear();
 		
 		for(BarcodedProduct product : list) {
@@ -213,7 +192,7 @@ public class SoftwareMain {
 		}
 	}
 	
-	public static ArrayList<Product> convertItemToProduct(ArrayList<BarcodedItem> list) {
+	public ArrayList<Product> convertItemToProduct(ArrayList<BarcodedItem> list) {
 		ArrayList<Product> productList = new ArrayList<Product>();
 		
 		for(BarcodedItem item : list) {
