@@ -1,7 +1,7 @@
 
 import java.util.ArrayList;
 
-import org.lsmr.selfcheckout.Item;
+import org.lsmr.selfcheckout.BarcodedItem;
 import org.lsmr.selfcheckout.devices.BarcodeScanner;
 import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.OverloadException;
@@ -10,16 +10,20 @@ import org.lsmr.selfcheckout.devices.SimulationException;
 public class CustomerScanItem {
 	
 	//Initializing global variables used to scan items or place items in bagging area.
-	private ArrayList<Item> scannedItems;
-	private BarcodeScanner scanner;
+	private ArrayList<BarcodedItem> scannedItems;
+	private BarcodeScanner scannerMain;
+	private BarcodeScanner scannerHeld;
 	private ElectronicScale baggingScale;
 	
 	/*
 	 * 	Constructor with previously scanned items provided.
 	 */
-	CustomerScanItem(BarcodeScanner scanner, ElectronicScale baggingScale, ArrayList<Item> previouslyScannedItems){
-		if(scanner == null)
-			throw new SimulationException("Barcode scanner is null");
+	CustomerScanItem(BarcodeScanner scannerMain, BarcodeScanner scannerHeld, ElectronicScale baggingScale, ArrayList<BarcodedItem> previouslyScannedItems){
+		if(scannerMain == null)
+			throw new SimulationException("Main barcode scanner is null");
+		
+		if(scannerHeld == null)
+			throw new SimulationException("Held barcode scanner is null");
 		
 		if(baggingScale == null)
 			throw new SimulationException("Bagging area scale is null");
@@ -30,7 +34,8 @@ public class CustomerScanItem {
 		if(previouslyScannedItems.size() == 0)
 			throw new SimulationException("List of previously scanned items is empty");
 		
-		this.scanner = scanner;
+		this.scannerMain = scannerMain;
+		this.scannerHeld = scannerHeld;
 		this.baggingScale = baggingScale;
 		scannedItems = previouslyScannedItems;
 	}
@@ -38,36 +43,51 @@ public class CustomerScanItem {
 	/*
 	 * 	Constructor without previously scanned items provided.
 	 */
-	CustomerScanItem(BarcodeScanner scanner, ElectronicScale baggingScale){
-		if(scanner == null)
-			throw new SimulationException("Barcode scanner is null");
+	CustomerScanItem(BarcodeScanner scannerMain, BarcodeScanner scannerHeld, ElectronicScale baggingScale){
+		if(scannerMain == null)
+			throw new SimulationException("Main barcode scanner is null");
+		
+		if(scannerHeld == null)
+			throw new SimulationException("Held barcode scanner is null");
 		
 		if(baggingScale == null)
 			throw new SimulationException("Bagging area scale is null");
 		
-		this.scanner = scanner;
+		this.scannerMain = scannerMain;
+		this.scannerHeld = scannerHeld;
 		this.baggingScale = baggingScale;
-		scannedItems = new ArrayList<Item>();
+		scannedItems = new ArrayList<BarcodedItem>();
 	}
 	
 	/*
 	 * 	Scans a given item
 	 */
-	public void scanItem(Item item) {
+	public void scanItemMain(BarcodedItem item) {
 		if(item == null)
 			throw new SimulationException("Can't scan item, item is null.");
 		
-		if(scanner.isDisabled())
+		if(scannerMain.isDisabled())
 			throw new SimulationException("Can't scan item, Scanner is disabled.");
 		
-		scanner.scan(item);
+		scannerMain.scan(item);
+		scannedItems.add(item);
+	}
+	
+	public void scanItemHeld(BarcodedItem item) {
+		if(item == null)
+			throw new SimulationException("Can't scan item, item is null.");
+		
+		if(scannerHeld.isDisabled())
+			throw new SimulationException("Can't scan item, Scanner is disabled.");
+		
+		scannerHeld.scan(item);
 		scannedItems.add(item);
 	}
 	
 	/*
 	 * 	Places a given item in bagging area
 	 */
-	public void placeItemInBagging(Item item) throws OverloadException {
+	public void placeItemInBagging(BarcodedItem item) throws OverloadException {
 		if(item == null)
 			throw new SimulationException("Can't place null item in bagging area.");
 		
@@ -83,7 +103,7 @@ public class CustomerScanItem {
 	/*
 	 * 	Removes a scanned item
 	 */
-	public void removeScannedItem(Item item) {
+	public void removeScannedItem(BarcodedItem item) {
 		if(item == null)
 			throw new SimulationException("Can't remove item, item is null.");
 
@@ -93,7 +113,7 @@ public class CustomerScanItem {
 	/*
 	 * 	Removes a given item from bagging area
 	 */
-	public void removeItemFromBagging(Item item) throws OverloadException {
+	public void removeItemFromBagging(BarcodedItem item) throws OverloadException {
 		if(item == null)
 			throw new SimulationException("Can't remove null item from bagging area.");
 		
@@ -107,7 +127,7 @@ public class CustomerScanItem {
 	 * 	Clears all items from the bagging area
 	 */
 	public void clearBaggedItems() throws OverloadException {
-		for(Item item : scannedItems) {
+		for(BarcodedItem item : scannedItems) {
 			try {
 				baggingScale.remove(item);
 			}
@@ -131,7 +151,7 @@ public class CustomerScanItem {
 	private double scannedItemWeights() {
 		double total = 0;
 		
-		for(Item item : scannedItems) {
+		for(BarcodedItem item : scannedItems) {
 			total += item.getWeight();
 		}
 		

@@ -38,23 +38,31 @@ public class CustomerPayment {
 	// boolean if there are banknotes
 	// boolean if there are coins
 	// banknotes will be handled first
-	public void Pay(boolean banknotebool, boolean coinbool, Banknote banknote, Coin coin) throws DisabledException{
-		if(banknotebool == true) {
-			if(banknote == null) {
-				throw new SimulationException("Banknote is null");
-			}
-			station.banknoteValidator.accept(banknote);
-			
-			setTotal(getTotal().subtract(BigDecimal.valueOf(banknote.getValue())));
+	
+	public void PayCoin(Coin coin) throws DisabledException{
+		if(coin == null) {
+			throw new SimulationException("Coin is null");
 		}
 		
-		if(coinbool == true) {
-			if(coin == null) {
-				throw new SimulationException("Coin is null");
-			}
-			station.coinValidator.accept(coin);
+		int capacity = station.coinStorage.getCoinCount();
+		
+		station.coinValidator.accept(coin);
+		
+		if(capacity != station.coinStorage.getCoinCount())
 			setTotal(getTotal().subtract(coin.getValue()));
+	}
+	
+	public void PayBanknote(Banknote banknote) throws DisabledException{
+		if(banknote == null) {
+			throw new SimulationException("Banknote is null");
 		}
+		
+		int capacity = station.banknoteStorage.getBanknoteCount();
+		
+		station.banknoteValidator.accept(banknote);
+		
+		if(capacity != station.banknoteStorage.getBanknoteCount())
+			setTotal(getTotal().subtract(BigDecimal.valueOf(banknote.getValue())));
 	}
 	
 	// getter and setter for the price total
