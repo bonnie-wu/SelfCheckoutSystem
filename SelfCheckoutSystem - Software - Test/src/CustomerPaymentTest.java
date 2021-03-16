@@ -56,14 +56,17 @@ public class CustomerPaymentTest {
 	
 	@Test
 	public void testIfTotalIsCorrect() {
-		ArrayList<Product> scannedProducts = new ArrayList<>(Arrays.asList(new Product[] {
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
 				newProduct(15.2),
 				newProduct(5.0),
 				newProduct(1.5),
 				newProduct(100)
 		}));
 		
-		//CustomerPayment payment = new CustomerPayment(scannedProducts)
+		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
+		payment.total();
+		
+		assertEquals(15.2+5.0+1.5+100, payment.getTotal());
 	}
 	
 	private BarcodedProduct newProduct(double price) {
