@@ -1,22 +1,23 @@
+import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 
 public class CustomerPayment {
 //HEY
 
-	private SelfCheckOutStation station;
+	private SelfCheckoutStation station;
 	private float total;
 	private float[] list;
 	
-	CustomerPayment(SelfCheckoutStation station, float[] list;){
+	CustomerPayment(SelfCheckoutStation station, float[] list){
 		this.station = station;
 		this.list = list;
 	}
 
 	// calculate the total of everything in the array
-	public float total() {
+	public void total() {
 		int length = this.list.length;
-		for(int i; i < length; i++) {
+		for(int i = 0; i < length; i++) {
 			setTotal(getTotal() + list[i]);
-		}	
+		}
 	}
 	
 	// payment of the total, will include coins and banknote
