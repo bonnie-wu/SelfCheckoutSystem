@@ -1,11 +1,17 @@
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
+import org.lsmr.selfcheckout.Banknote;
+import org.lsmr.selfcheckout.Coin;
+import org.lsmr.selfcheckout.devices.DisabledException;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
+import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.products.Product;
 
 public class CustomerPayment {
 
 	private ArrayList<Product> scannedItems;
-	private float total;
+	private BigDecimal total;
 	private SelfCheckoutStation station;
 	
 	
@@ -22,9 +28,9 @@ public class CustomerPayment {
 
 	// calculate the total of everything in the arrayList
 	public void total() {
-		int length = this.list.length;
+		int length = this.scannedItems.size();
 		for(int i = 0; i < length; i++) {
-			setTotal(getTotal() + this.scannedItems[i].getPrice());
+			setTotal(getTotal().add(this.scannedItems.get(i).getPrice()));
 		}
 	}
 	
@@ -32,37 +38,31 @@ public class CustomerPayment {
 	// boolean if there are banknotes
 	// boolean if there are coins
 	// banknotes will be handled first
-	public void Pay(boolean banknote, boolean coin, Banknote banknote, Coin coin){
-		if(banknote == true) {
+	public void Pay(boolean banknotebool, boolean coinbool, Banknote banknote, Coin coin) throws DisabledException{
+		if(banknotebool == true) {
 			if(banknote == null) {
 				throw new SimulationException("Banknote is null");
 			}
-		boolean validNote = station.banknoteValidator.isValid(banknote);
-		if (validNote == true) {
 			station.banknoteValidator.accept(banknote);
 			
-			setTotal(getTotal() - banknote.getValue());
-			}
+			setTotal(getTotal().subtract(BigDecimal.valueOf(banknote.getValue())));
 		}
 		
-		if(coin == true) {
+		if(coinbool == true) {
 			if(coin == null) {
 				throw new SimulationException("Coin is null");
 			}
-		boolean validCoin = station.coinValidator.isValid(coin);
-		if(validCoin == true) {
 			station.coinValidator.accept(coin);
-			setTotal(getTotal() - coin.getValue());
-			}
+			setTotal(getTotal().subtract(coin.getValue()));
 		}
 	}
 	
 	// getter and setter for the price total
-	public float getTotal() {
+	public BigDecimal getTotal() {
 		return total;
 	}
 	
-	public void setTotal(float newTotal) {
+	public void setTotal(BigDecimal newTotal) {
 		this.total = newTotal;
 	}
 }

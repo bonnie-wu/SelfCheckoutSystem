@@ -10,6 +10,8 @@ public class SoftwareMain {
 	
 	public void main(String[] args) {
 		initialize();
+		
+		
 	}
 	
 	private void initialize() {
