@@ -6,23 +6,18 @@ public class CustomerPayment {
 
 	private ArrayList<Product> scannedItems;
 	private float total;
-	private CoinValidator coinValidator;
-	private BanknoteValidator banknoteValidator;
+	private SelfCheckoutStation station;
 	
 	
-	CustomerPayment(ArrayList<Product> scannedItems, CoinValidator coinValidator, BanknoteValidator banknoteValidator){
+	CustomerPayment(ArrayList<Product> scannedItems, SelfCheckoutStation station){
 		if(scannedItems == null) {
 			throw new SimulationException("List of scanned items is null");
 		}
-		if(banknoteValidator == null) {
+		if(station == null) {
 			throw new SimulationException("Banknote Validator is null");
 		}
-		if(coinValidtor == null) {
-			throw new SimulationException("Coin Validator is null");
-		}
-		this.coinValidator = coinValidator;
-		this.banknoteValidator = banknoteValidator;
 		this.scannedItems = scannedItems;
+		this.station = station;
 	}
 
 	// calculate the total of everything in the arrayList
@@ -42,19 +37,21 @@ public class CustomerPayment {
 			if(banknote == null) {
 				throw new SimulationException("Banknote is null");
 			}
-		boolean valid = banknoteValidator.isValid(banknote);
-		if (valid == true) {
-			banknoteValidator.accept(banknote);
+		boolean validNote = station.banknoteValidator.isValid(banknote);
+		if (validNote == true) {
+			station.banknoteValidator.accept(banknote);
+			
 			setTotal(getTotal() - banknote.getValue());
 			}
 		}
+		
 		if(coin == true) {
 			if(coin == null) {
 				throw new SimulationException("Coin is null");
 			}
-		boolean valid = coinValidator.isValid(coin);
-		if(valid == true) {
-			coinValidator.accept(coin);
+		boolean validCoin = station.coinValidator.isValid(coin);
+		if(validCoin == true) {
+			station.coinValidator.accept(coin);
 			setTotal(getTotal() - coin.getValue());
 			}
 		}
