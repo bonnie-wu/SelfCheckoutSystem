@@ -47,7 +47,7 @@ public class CustomerPaymentTest {
 		}
 		
 		try {
-			new CustomerPayment(new ArrayList<Product>(), null);
+			new CustomerPayment(new ArrayList<BarcodedProduct>(), null);
 			fail();
 		} catch (SimulationException e) {
 			// expected

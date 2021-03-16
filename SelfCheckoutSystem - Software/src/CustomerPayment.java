@@ -6,16 +6,16 @@ import org.lsmr.selfcheckout.Coin;
 import org.lsmr.selfcheckout.devices.DisabledException;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
-import org.lsmr.selfcheckout.products.Product;
+import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 public class CustomerPayment {
 
-	private ArrayList<Product> scannedItems;
+	private ArrayList<BarcodedProduct> scannedItems;
 	private BigDecimal total;
 	private SelfCheckoutStation station;
 	
 	
-	CustomerPayment(ArrayList<Product> scannedItems, SelfCheckoutStation station){
+	CustomerPayment(ArrayList<BarcodedProduct> scannedItems, SelfCheckoutStation station){
 		if(scannedItems == null) {
 			throw new SimulationException("List of scanned items is null");
 		}

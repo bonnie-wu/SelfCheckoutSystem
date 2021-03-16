@@ -36,6 +36,15 @@ public class SoftwareMain {
 	SoftwareMain(){
 		initialize();
 	}
+	
+	SoftwareMain(SelfCheckoutStation station, ArrayList<BarcodedProduct> scannedItems){
+		if(station == null)
+			throw new SimulationException("Station is null");
+		
+		this.station = station;
+		customerScanItem = new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea);
+		customerPayment = new CustomerPayment(scannedItems, station);
+	}
 
 	public void Pay(Coin coin) {
 		try {
@@ -177,8 +186,8 @@ public class SoftwareMain {
 		}
 	}
 	
-	public ArrayList<Product> convertItemToProduct(ArrayList<BarcodedItem> list) {
-		ArrayList<Product> productList = new ArrayList<Product>();
+	public ArrayList<BarcodedProduct> convertItemToProduct(ArrayList<BarcodedItem> list) {
+		ArrayList<BarcodedProduct> productList = new ArrayList<BarcodedProduct>();
 		
 		for(BarcodedItem item : list) {
 			if(!productDatabase.BARCODED_PRODUCT_DATABASE.containsKey(item.getBarcode()))
@@ -190,4 +199,7 @@ public class SoftwareMain {
 		return productList;
 	}
 	
+	public SelfCheckoutStation getStation() {
+		return station;
+	}
 }
