@@ -76,4 +76,11 @@ public class CustomerPayment {
 	public void setTotal(BigDecimal newTotal) {
 		this.total = newTotal;
 	}
+	
+	public void updateScannedProducts(ArrayList<BarcodedProduct> scannedProducts) {
+		if(scannedProducts == null)
+			throw new SimulationException("Can't update scanned products, input is null");
+		
+		scannedItems = scannedProducts;
+	}
 }
