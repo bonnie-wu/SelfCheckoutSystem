@@ -1,16 +1,40 @@
+/*
+ * 	Class:			CustomerPayment.java
+ * 	Description:	Handles the functionality of a customer paying with coin or banknote.
+ * 	Date:			3/17/2021
+ * 	Authors: 		Derek Urban, Bonnie Wu
+ */
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Currency;
 
 import org.lsmr.selfcheckout.Banknote;
+import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.Coin;
+import org.lsmr.selfcheckout.devices.AbstractDevice;
+import org.lsmr.selfcheckout.devices.BanknoteValidator;
+import org.lsmr.selfcheckout.devices.BarcodeScanner;
+import org.lsmr.selfcheckout.devices.CoinValidator;
 import org.lsmr.selfcheckout.devices.DisabledException;
+import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.devices.listeners.AbstractDeviceListener;
+import org.lsmr.selfcheckout.devices.listeners.BanknoteValidatorListener;
+import org.lsmr.selfcheckout.devices.listeners.BarcodeScannerListener;
+import org.lsmr.selfcheckout.devices.listeners.CoinValidatorListener;
+import org.lsmr.selfcheckout.devices.listeners.ElectronicScaleListener;
 import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 
 public class CustomerPayment {
-
+	
+	//Listener flags, used by the system to record listener responses
+	private boolean coinPaid = false;
+	private boolean banknotePaid = false;
+	
+	//Global variables
 	private ArrayList<BarcodedProduct> scannedItems;
 	private float total;
 	private SelfCheckoutStation station;
@@ -32,6 +56,40 @@ public class CustomerPayment {
 		this.scannedItems = scannedItems;
 		this.station = station;
 		total();
+		
+		initListeners();
+	}
+	
+	/**
+	 * Initializes the listeners used by this class to listen to hardware and ensure use cases are properly
+	 * commenced, such as paying with coin or banknote. Will set flags according to hardware responses
+	 */
+	private void initListeners() {
+		station.coinValidator.register(new CoinValidatorListener(){
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void validCoinDetected(CoinValidator validator, BigDecimal value) {
+				if(validator.equals(station.coinValidator))
+					coinPaid = true;
+			}
+			public void invalidCoinDetected(CoinValidator validator) {
+				if(validator.equals(station.coinValidator))
+					coinPaid = false;
+			}
+		});
+		
+		station.banknoteValidator.register(new BanknoteValidatorListener(){
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void validBanknoteDetected(BanknoteValidator validator, Currency currency, int value) {
+				if(validator.equals(station.banknoteValidator))
+					banknotePaid = true;
+			}
+			public void invalidBanknoteDetected(BanknoteValidator validator) {
+				if(validator.equals(station.banknoteValidator))
+					banknotePaid = false;
+			}
+		});
 	}
 
 	/**
@@ -55,15 +113,20 @@ public class CustomerPayment {
 	 * @throws DisabledException occurs when the coin is null
 	 */
 	public void PayCoin(Coin coin) throws DisabledException{
+		coinPaid = false;
+		
 		if(coin == null) {
 			throw new SimulationException("Coin is null");
 		}
 		
-		int capacity = station.coinStorage.getCoinCount();
+		int coinCount = station.coinStorage.getCoinCount();
+		
+		if(station.coinStorage.getCapacity() == coinCount)
+			throw new SimulationException("Cannot deliver coin, coin storage is full!");
 		
 		station.coinValidator.accept(coin);
 		
-		if(capacity != station.coinStorage.getCoinCount())
+		if(coinPaid)
 			total -= coin.getValue().floatValue();
 	}
 	
@@ -76,15 +139,20 @@ public class CustomerPayment {
 	 * @throws DisabledException occurs when the banknote is null
 	 */
 	public void PayBanknote(Banknote banknote) throws DisabledException{
+		banknotePaid = false;
+		
 		if(banknote == null) {
 			throw new SimulationException("Banknote is null");
 		}
 		
-		int capacity = station.banknoteStorage.getBanknoteCount();
+		int banknoteCount = station.banknoteStorage.getBanknoteCount();
+		
+		if(station.banknoteStorage.getCapacity() == banknoteCount)
+			throw new SimulationException("Cannot deliver banknote, banknote storage is full!");
 		
 		station.banknoteValidator.accept(banknote);
 		
-		if(capacity != station.banknoteStorage.getBanknoteCount())
+		if(banknotePaid)
 			total -= banknote.getValue();
 	}
 	

@@ -1,3 +1,10 @@
+/*
+ * 	Class:			CustomerScanItemTest.java
+ * 	Description:	JUnit testing class for CustomerScanItem.java
+ * 	Date:			3/17/2021
+ * 	Authors: 		Vianney, Nguyen
+ */
+
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
