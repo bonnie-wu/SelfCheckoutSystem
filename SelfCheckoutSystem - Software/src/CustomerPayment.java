@@ -11,7 +11,7 @@ import org.lsmr.selfcheckout.products.BarcodedProduct;
 public class CustomerPayment {
 
 	private ArrayList<BarcodedProduct> scannedItems;
-	private BigDecimal total;
+	private float total;
 	private SelfCheckoutStation station;
 	
 	
@@ -24,16 +24,15 @@ public class CustomerPayment {
 		}
 		this.scannedItems = scannedItems;
 		this.station = station;
-		
-		total = BigDecimal.valueOf(0);
 		total();
 	}
 
 	// calculate the total of everything in the arrayList
 	public void total() {
+		total = 0;
 		int length = this.scannedItems.size();
 		for(int i = 0; i < length; i++) {
-			setTotal(getTotal().add(this.scannedItems.get(i).getPrice()));
+			total += this.scannedItems.get(i).getPrice().floatValue();
 		}
 	}
 	
@@ -52,7 +51,7 @@ public class CustomerPayment {
 		station.coinValidator.accept(coin);
 		
 		if(capacity != station.coinStorage.getCoinCount())
-			setTotal(getTotal().subtract(coin.getValue()));
+			total -= coin.getValue().floatValue();
 	}
 	
 	public void PayBanknote(Banknote banknote) throws DisabledException{
@@ -65,16 +64,16 @@ public class CustomerPayment {
 		station.banknoteValidator.accept(banknote);
 		
 		if(capacity != station.banknoteStorage.getBanknoteCount())
-			setTotal(getTotal().subtract(BigDecimal.valueOf(banknote.getValue())));
+			total -= banknote.getValue();
 	}
 	
 	// getter and setter for the price total
-	public BigDecimal getTotal() {
+	public float getTotal() {
 		return total;
 	}
 	
-	public void setTotal(BigDecimal newTotal) {
-		this.total = newTotal;
+	public void setTotal(float newTotal) {
+		total = newTotal;
 	}
 	
 	public void updateScannedProducts(ArrayList<BarcodedProduct> scannedProducts) {
@@ -82,5 +81,6 @@ public class CustomerPayment {
 			throw new SimulationException("Can't update scanned products, input is null");
 		
 		scannedItems = scannedProducts;
+		total();
 	}
 }

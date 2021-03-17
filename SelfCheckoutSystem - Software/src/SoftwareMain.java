@@ -44,12 +44,12 @@ public class SoftwareMain {
 			throw new SimulationException("previouslyScannedItems is null");
 			
 		this.station = station;
-		customerScanItem = new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea);
+		customerScanItem = new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, previouslyScannedItems);
 		customerPayment = new CustomerPayment(new ArrayList<BarcodedProduct>(), station);
 	}
 
 	public void Pay(Coin coin) {
-		customerPayment.updateScannedProducts(convertItemToProduct(customerScanItem.getScannedItems()));
+		updateScannedProducts();
 		
 		try {
 			customerPayment.PayCoin(coin);
@@ -60,7 +60,7 @@ public class SoftwareMain {
 	}
 	
 	public void Pay(Banknote banknote) {
-		customerPayment.updateScannedProducts(convertItemToProduct(customerScanItem.getScannedItems()));
+		updateScannedProducts();
 		
 		try {
 			customerPayment.PayBanknote(banknote);
@@ -203,6 +203,10 @@ public class SoftwareMain {
 		}
 		
 		return productList;
+	}
+	
+	public void updateScannedProducts() {
+		customerPayment.updateScannedProducts(convertItemToProduct(customerScanItem.getScannedItems()));
 	}
 	
 	public SelfCheckoutStation getStation() {
