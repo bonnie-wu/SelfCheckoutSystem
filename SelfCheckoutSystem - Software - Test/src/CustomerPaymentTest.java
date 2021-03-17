@@ -9,6 +9,8 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 import org.lsmr.selfcheckout.Barcode;
+import org.lsmr.selfcheckout.BarcodedItem;
+import org.lsmr.selfcheckout.Item;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
 import org.lsmr.selfcheckout.products.BarcodedProduct;
@@ -57,21 +59,21 @@ public class CustomerPaymentTest {
 	@Test
 	public void testIfTotalIsCorrect() {
 		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
-				newProduct(15.2),
-				newProduct(5.0),
-				newProduct(1.5),
-				newProduct(100)
+				newProduct("01234", 15.2),
+				newProduct("01234", 5.0),
+				newProduct("01234", 1.5),
+				newProduct("01234", 100)
 		}));
 		
 		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
 		payment.total();
 		
-		assertEquals(15.2+5.0+1.5+100, payment.getTotal());
+		assertSame(15.2+5.0+1.5+100, payment.getTotal());
 	}
 	
-	private BarcodedProduct newProduct(double price) {
+	private BarcodedProduct newProduct(String barcode, double price) {
 		index++;
-		return new BarcodedProduct(new Barcode(String.valueOf(index)), "Desc: " + index, new BigDecimal(price));
+		return new BarcodedProduct(new Barcode(barcode), "Test Product" + index, new BigDecimal(price));
 	}
 
 }
