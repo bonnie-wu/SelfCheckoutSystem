@@ -26,6 +26,7 @@ import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 public class SoftwareMain {
 	
+	//Global Variables
 	private boolean payMode = false;
 	public ArrayList<BarcodedItem> previouslyScannedItems;
 	public ProductDatabases productDatabase;
@@ -33,11 +34,18 @@ public class SoftwareMain {
 	public CustomerScanItem customerScanItem;
 	public CustomerPayment customerPayment;
 	
+	/*
+	 * Default Constructor that initializes the SelfCheckoutStation and ProductDatabase
+	 */
 	SoftwareMain(){
 		payMode = false;
 		initialize();
 	}
 	
+	/*
+	 * Constructor that allows external initialization of SelfCheckoutStation and previouslyScannedItems
+	 * Note: populateDatabase must be called by external source for proper usage
+	 */
 	SoftwareMain(SelfCheckoutStation station, ArrayList<BarcodedItem> previouslyScannedItems){
 		payMode = false;
 		
@@ -52,6 +60,10 @@ public class SoftwareMain {
 		customerPayment = new CustomerPayment(new ArrayList<BarcodedProduct>(), station);
 	}
 
+	/*
+	 * Allows user to make payment with a given coin
+	 * Enables payMode, disallowing customer to continue scanning items
+	 */
 	public void Pay(Coin coin) {
 		payMode = true;
 		
@@ -65,6 +77,10 @@ public class SoftwareMain {
 		}
 	}
 	
+	/*
+	 * Allows user to make payment with a given banknote
+	 * Enables payMode, disallowing customer to continue scanning items
+	 */
 	public void Pay(Banknote banknote) {
 		payMode = true;
 		
@@ -78,16 +94,25 @@ public class SoftwareMain {
 		}
 	}
 	
+	/*
+	 * Scans an item with the main scanner
+	 */
 	public void ScanMain(BarcodedItem item) {
 		if(!payMode)
 			customerScanItem.scanItemMain(item);
 	}
 	
+	/*
+	 * Scans an item with the hand held scanner
+	 */
 	public void ScanHeld(BarcodedItem item) {
 		if(!payMode)
 			customerScanItem.scanItemHeld(item);
 	}
 	
+	/*
+	 * Places an item in the bagging area
+	 */
 	public void Bag(BarcodedItem item) {
 		try {
 			customerScanItem.placeItemInBagging(item);
@@ -97,6 +122,9 @@ public class SoftwareMain {
 		}
 	}
 	
+	/*
+	 * Default initialization of SoftwareMain components
+	 */
 	public void initialize() {
 		Currency currency = Currency.getInstance(Locale.CANADA);
 		int[] banknoteDenominations = {5, 10, 20, 50, 100};
@@ -131,6 +159,9 @@ public class SoftwareMain {
 		customerPayment = new CustomerPayment(convertItemToProduct(previouslyScannedItems), station);
 	}
 	
+	/*
+	 * Default initialization of SoftwareMain listeners
+	 */
 	private void initializeListeners(BarcodeScanner mainScanner, BarcodeScanner heldScanner, CoinValidator coinValidator, 
 									 ElectronicScale baggingArea, BanknoteValidator banknoteValidator) {
 		mainScanner.register(new BarcodeScannerListener() {
@@ -185,15 +216,10 @@ public class SoftwareMain {
 			}
 		});
 	}
-	
-	public void populateItems(ArrayList<BarcodedItem> list) {
-		previouslyScannedItems.clear();
-		
-		for(BarcodedItem item : list) {
-			previouslyScannedItems.add(item);
-		}
-	}
-	
+
+	/*
+	 * Populates the product database with a given list of barcoded products
+	 */
 	public void populateDatabase(ArrayList<BarcodedProduct> list) {
 		productDatabase.BARCODED_PRODUCT_DATABASE.clear();
 		
@@ -202,6 +228,10 @@ public class SoftwareMain {
 		}
 	}
 	
+	/*
+	 * Converts a list of BarcodedItems into a list of BarcodedProducts by utilizing the product database
+	 * Throws an exception if the product isn't found in the database (can't complete the task)
+	 */
 	public ArrayList<BarcodedProduct> convertItemToProduct(ArrayList<BarcodedItem> list) {
 		ArrayList<BarcodedProduct> productList = new ArrayList<BarcodedProduct>();
 		
@@ -215,14 +245,23 @@ public class SoftwareMain {
 		return productList;
 	}
 	
+	/*
+	 * Updates the list of scanned products in the customer payment class
+	 */
 	public void updateScannedProducts() {
 		customerPayment.updateScannedProducts(convertItemToProduct(customerScanItem.getScannedItems()));
 	}
 	
+	/*
+	 * Returns the SelfCheckoutStation used by this class
+	 */
 	public SelfCheckoutStation getStation() {
 		return station;
 	}
 	
+	/*
+	 * Resets the station out of payMode
+	 */
 	public void reset() {
 		payMode = false;
 		
