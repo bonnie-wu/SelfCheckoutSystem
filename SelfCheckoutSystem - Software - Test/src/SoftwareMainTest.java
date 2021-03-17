@@ -41,7 +41,7 @@ public class SoftwareMainTest {
 	
 	@Test
 	public void testScanAndPay() {
-		ArrayList<BarcodedItem> scannedItem = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
 				newItem("01234", 1000),
 				newItem("012345", 1500),
 				newItem("0123456", 3000)
@@ -55,7 +55,7 @@ public class SoftwareMainTest {
 				newProduct("012345678", 8.50)
 		}));
 		
-		SoftwareMain main = new SoftwareMain(station, scannedItem);
+		SoftwareMain main = new SoftwareMain(station, scannedItems);
 		
 		main.populateDatabase(databaseProducts);
 		
@@ -64,7 +64,7 @@ public class SoftwareMainTest {
 		
 		main.updateScannedProducts();
 		
-		assertSame(4.50 + 7.50 + 9.50 + 1.50 + 8.50, main.customerPayment.getTotal());
+		assertEquals(4.50 + 7.50 + 9.50 + 1.50 + 8.50, main.customerPayment.getTotal(), 0.000001);
 	}
 	
 	private BarcodedProduct newProduct(String barcode, double price) {
