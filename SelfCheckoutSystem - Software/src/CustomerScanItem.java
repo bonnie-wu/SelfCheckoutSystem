@@ -1,27 +1,21 @@
-
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Currency;
 
 import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
 import org.lsmr.selfcheckout.devices.AbstractDevice;
-import org.lsmr.selfcheckout.devices.BanknoteValidator;
 import org.lsmr.selfcheckout.devices.BarcodeScanner;
-import org.lsmr.selfcheckout.devices.CoinValidator;
 import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.OverloadException;
 import org.lsmr.selfcheckout.devices.SimulationException;
 import org.lsmr.selfcheckout.devices.listeners.AbstractDeviceListener;
-import org.lsmr.selfcheckout.devices.listeners.BanknoteValidatorListener;
 import org.lsmr.selfcheckout.devices.listeners.BarcodeScannerListener;
-import org.lsmr.selfcheckout.devices.listeners.CoinValidatorListener;
 import org.lsmr.selfcheckout.devices.listeners.ElectronicScaleListener;
 
 public class CustomerScanItem {
 	
 	//Initializing global variables used to scan items or place items in bagging area.
 	private boolean itemScanned = false;
+	private boolean scaleOverload = false;
 	
 	private ArrayList<BarcodedItem> scannedItems;
 	private BarcodeScanner scannerMain;
@@ -94,6 +88,18 @@ public class CustomerScanItem {
 				itemScanned = true;
 			}
 		});
+		
+		baggingScale.register(new ElectronicScaleListener(){
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void weightChanged(ElectronicScale scale, double weightInGrams) {}
+			public void overload(ElectronicScale scale) {
+				scaleOverload = true;
+			}
+			public void outOfOverload(ElectronicScale scale) {
+				scaleOverload = false;
+			}
+		});
 	}
 	
 	/*
@@ -108,6 +114,10 @@ public class CustomerScanItem {
 		
 		if(scannerMain.isDisabled())
 			throw new SimulationException("Can't scan item, Scanner is disabled.");
+		
+		if(scaleOverload)
+			throw new SimulationException("Can't scan item, bagging area exceeds weight limit.");
+		
 		scannerMain.scan(item);
 		
 		if(itemScanned)
@@ -126,6 +136,9 @@ public class CustomerScanItem {
 		
 		if(scannerHeld.isDisabled())
 			throw new SimulationException("Can't scan item, Scanner is disabled.");
+		
+		if(scaleOverload)
+			throw new SimulationException("Can't scan item, bagging area exceeds weight limit.");
 		
 		scannerHeld.scan(item);
 		
