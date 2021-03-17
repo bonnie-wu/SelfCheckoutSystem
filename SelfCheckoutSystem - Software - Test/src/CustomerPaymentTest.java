@@ -13,9 +13,25 @@ import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
 import org.lsmr.selfcheckout.Coin;
 import org.lsmr.selfcheckout.Item;
+import org.lsmr.selfcheckout.devices.AbstractDevice;
+import org.lsmr.selfcheckout.devices.Acceptor;
+import org.lsmr.selfcheckout.devices.BanknoteDispenser;
+import org.lsmr.selfcheckout.devices.BanknoteSlot;
+import org.lsmr.selfcheckout.devices.BanknoteStorageUnit;
+import org.lsmr.selfcheckout.devices.CoinStorageUnit;
+import org.lsmr.selfcheckout.devices.CoinTray;
 import org.lsmr.selfcheckout.devices.DisabledException;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.devices.UnidirectionalChannel;
+import org.lsmr.selfcheckout.devices.listeners.AbstractDeviceListener;
+import org.lsmr.selfcheckout.devices.listeners.BanknoteDispenserListener;
+import org.lsmr.selfcheckout.devices.listeners.BanknoteSlotListener;
+import org.lsmr.selfcheckout.devices.listeners.BanknoteStorageUnitListener;
+import org.lsmr.selfcheckout.devices.listeners.CoinSlotListener;
+import org.lsmr.selfcheckout.devices.listeners.CoinStorageUnitListener;
+import org.lsmr.selfcheckout.devices.listeners.CoinTrayListener;
+import org.lsmr.selfcheckout.devices.listeners.CoinValidatorListener;
 import org.lsmr.selfcheckout.products.BarcodedProduct;
 import org.lsmr.selfcheckout.products.Product;
 
@@ -194,6 +210,46 @@ public class CustomerPaymentTest {
 	 */
 	@Test
 	public void testCorrectCoinSink() throws DisabledException {
+		CoinReceiverListenerStub storageListener = new CoinReceiverListenerStub();
+		CoinReceiverListenerStub rejectListener = new CoinReceiverListenerStub();
+		
+		station.coinStorage.register(storageListener);
+		station.coinTray.register(rejectListener);
+		
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+				newProduct("01234", 15.2)
+		}));
+		
+		// pay
+		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
+		payment.PayCoin(new Coin(BigDecimal.valueOf(2.00), getCurrency()));
+		
+		// verify that the machine received it
+		assertEquals(1, storageListener.count);
+		assertEquals(0, rejectListener.count);
+		
+		// try it out with invalid coin
+		storageListener.count = 0;
+		rejectListener.count = 0;
+		
+		payment.PayCoin(new Coin(BigDecimal.valueOf(3), getCurrency()));
+		// verify that the machine received it
+		assertEquals(0, storageListener.count);
+		assertEquals(1, rejectListener.count);
+	}
+
+	/**
+	 * Verify that a banknote is either accepted or rejected properly
+	 * @throws DisabledException
+	 */
+	@Test
+	public void testCorrectBanknoteResponse() throws DisabledException {
+		BanknoteReceiverListenerStub storageListener = new BanknoteReceiverListenerStub();
+		BanknoteReceiverListenerStub rejectListener = new BanknoteReceiverListenerStub();
+		
+		station.banknoteStorage.register(storageListener);
+		station.banknoteInput.register(rejectListener);
+		
 		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
 				newProduct("01234", 15.2)
 		}));
@@ -202,13 +258,20 @@ public class CustomerPaymentTest {
 		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
 		payment.PayBanknote(new Banknote(10, getCurrency()));
 		
-		// scan more items
-		payment.updateScannedProducts(scannedProducts);
+		// verify that the machine received it
+		assertEquals(1, storageListener.count);
+		assertEquals(0, rejectListener.count);
 		
-		assertEquals(15.2-10, payment.getTotal(), 0.0001);
+		// try it out with invalid coin
+		storageListener.count = 0;
+		rejectListener.count = 0;
 		
+		payment.PayBanknote(new Banknote(19, getCurrency()));
+		// verify that the machine received it
+		assertEquals(0, storageListener.count);
+		assertEquals(1, rejectListener.count);
 	}
-
+	
 	/**
 	 * For full coverage
 	 */
@@ -237,6 +300,84 @@ public class CustomerPaymentTest {
 	
 	private Currency getCurrency() {
 		return Currency.getInstance(Locale.CANADA);
+	}
+	
+	private static class CoinReceiverListenerStub implements CoinStorageUnitListener, CoinTrayListener {
+		public int count = 0;
+
+		@Override
+		public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {
+		}
+
+		@Override
+		public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {
+		}
+
+		@Override
+		public void coinAdded(CoinTray tray) {
+			count++;
+		}
+
+		@Override
+		public void coinsFull(CoinStorageUnit unit) {
+		}
+
+		@Override
+		public void coinAdded(CoinStorageUnit unit) {
+			count++;
+		}
+
+		@Override
+		public void coinsLoaded(CoinStorageUnit unit) {
+		}
+
+		@Override
+		public void coinsUnloaded(CoinStorageUnit unit) {
+		}
+	}
+	
+	private static class BanknoteReceiverListenerStub implements BanknoteStorageUnitListener, BanknoteSlotListener {
+		
+		public int count = 0;
+
+		@Override
+		public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {
+		}
+
+		@Override
+		public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {
+		}
+
+		@Override
+		public void banknotesFull(BanknoteStorageUnit unit) {
+		}
+
+		@Override
+		public void banknoteAdded(BanknoteStorageUnit unit) {
+			count++;
+		}
+
+		@Override
+		public void banknotesLoaded(BanknoteStorageUnit unit) {
+		}
+
+		@Override
+		public void banknotesUnloaded(BanknoteStorageUnit unit) {
+		}
+
+		@Override
+		public void banknoteInserted(BanknoteSlot slot) {
+		}
+
+		@Override
+		public void banknoteEjected(BanknoteSlot slot) {
+			count++;
+		}
+
+		@Override
+		public void banknoteRemoved(BanknoteSlot slot) {
+		}
+		
 	}
 
 }
