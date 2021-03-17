@@ -8,6 +8,7 @@ import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
 import org.lsmr.selfcheckout.products.BarcodedProduct;
 
+
 public class CustomerPayment {
 
 	private ArrayList<BarcodedProduct> scannedItems;
@@ -15,6 +16,12 @@ public class CustomerPayment {
 	private SelfCheckoutStation station;
 	
 	
+	/**
+	 * Constructor for class and initializes variables
+	 * 
+	 * @param scannedItems An ArrayList of Barcoded Products of items that have been scanned
+	 * @param station The SelfCheckoutStation on which this software is operating on
+	 */
 	CustomerPayment(ArrayList<BarcodedProduct> scannedItems, SelfCheckoutStation station){
 		if(scannedItems == null) {
 			throw new SimulationException("List of scanned items is null");
@@ -27,7 +34,9 @@ public class CustomerPayment {
 		total();
 	}
 
-	// calculate the total of everything in the arrayList
+	/**
+	 * Calculates the price total for all the scanned items in scannedItems
+	 */
 	public void total() {
 		total = 0;
 		int length = this.scannedItems.size();
@@ -36,11 +45,12 @@ public class CustomerPayment {
 		}
 	}
 	
-	// payment of the total, will include coins and banknote
-	// boolean if there are banknotes
-	// boolean if there are coins
-	// banknotes will be handled first
-	
+	/**
+	 * Method for the customer to pay with a coin
+	 * 
+	 * @param coin Type Coin of the coin that is being used to pay with
+	 * @throws DisabledException occurs when the coin is null
+	 */
 	public void PayCoin(Coin coin) throws DisabledException{
 		if(coin == null) {
 			throw new SimulationException("Coin is null");
@@ -54,6 +64,12 @@ public class CustomerPayment {
 			total -= coin.getValue().floatValue();
 	}
 	
+	/**
+	 * Method for the customer to pay with a banknote
+	 * 
+	 * @param banknote Type Banknote of the banknote that is being used to pay with
+	 * @throws DisabledException occurs when the banknote is null
+	 */
 	public void PayBanknote(Banknote banknote) throws DisabledException{
 		if(banknote == null) {
 			throw new SimulationException("Banknote is null");
@@ -67,15 +83,27 @@ public class CustomerPayment {
 			total -= banknote.getValue();
 	}
 	
-	// getter and setter for the price total
+	
+	/**
+	 * Getter for the total
+	 * @return total, type float to access the total of this class
+	 */
 	public float getTotal() {
 		return total;
 	}
 	
+	/**
+	 * Setter for the total
+	 * @param newTotal, type float of the new total
+	 */
 	public void setTotal(float newTotal) {
 		total = newTotal;
 	}
 	
+	/**
+	 * Method to update new scanned products and calculate the new total
+	 * @param scannedProducts ArrayList of barcoded products of scanned products
+	 */
 	public void updateScannedProducts(ArrayList<BarcodedProduct> scannedProducts) {
 		if(scannedProducts == null)
 			throw new SimulationException("Can't update scanned products, input is null");
