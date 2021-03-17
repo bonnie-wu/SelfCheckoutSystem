@@ -16,7 +16,8 @@ public class CustomerScanItem {
 	private ElectronicScale baggingScale;
 	
 	/*
-	 * 	Constructor with previously scanned items provided.
+	 * 	This constructor should throw a simulation exception if any invalid parameter is given.
+	 * 	It should also initialize previously scanned items.
 	 */
 	CustomerScanItem(BarcodeScanner scannerMain, BarcodeScanner scannerHeld, ElectronicScale baggingScale, ArrayList<BarcodedItem> previouslyScannedItems){
 		if(scannerMain == null)
@@ -41,7 +42,8 @@ public class CustomerScanItem {
 	}
 	
 	/*
-	 * 	Constructor without previously scanned items provided.
+	 * 	This constructor should throw a simulation exception if any invalid parameter is given.
+	 * 	It shouldn't initialize previously scanned items.
 	 */
 	CustomerScanItem(BarcodeScanner scannerMain, BarcodeScanner scannerHeld, ElectronicScale baggingScale){
 		if(scannerMain == null)
@@ -60,7 +62,8 @@ public class CustomerScanItem {
 	}
 	
 	/*
-	 * 	Scans a given item
+	 *  This function should scan a valid item and add it to the scannedItems list
+	 *  It completes this task by calling the main scanner in SelfCheckoutStation, which will notify it's listeners upon successful scan
 	 */
 	public void scanItemMain(BarcodedItem item) {
 		if(item == null)
@@ -73,6 +76,10 @@ public class CustomerScanItem {
 		scannedItems.add(item);
 	}
 	
+	/*
+	 *  This function should scan a valid item and add it to the scannedItems list
+	 *  It completes this task by calling the hand held scanner in SelfCheckoutStation, which will notify it's listeners upon successful scan
+	 */
 	public void scanItemHeld(BarcodedItem item) {
 		if(item == null)
 			throw new SimulationException("Can't scan item, item is null.");
@@ -85,7 +92,9 @@ public class CustomerScanItem {
 	}
 	
 	/*
-	 * 	Places a given item in bagging area
+	 *  This function should place a valid item into the bagging area.
+	 *  It should add the item to the bagging area scale which should update the total weight on the bagging area scale.
+	 *  It should notify the bagging scale listeners upon successful placement
 	 */
 	public void placeItemInBagging(BarcodedItem item) throws OverloadException{
 		if(item == null)
@@ -101,7 +110,7 @@ public class CustomerScanItem {
 	}
 	
 	/*
-	 * 	Removes a scanned item
+	 *  This function should remove a valid item from the scanned list.
 	 */
 	public void removeScannedItem(BarcodedItem item) {
 		if(item == null)
@@ -111,7 +120,7 @@ public class CustomerScanItem {
 	}
 	
 	/*
-	 * 	Removes a given item from bagging area
+	 *  This function should remove a valid item from bagging area scale.
 	 */
 	public void removeItemFromBagging(BarcodedItem item) throws OverloadException {
 		if(item == null)
@@ -158,6 +167,9 @@ public class CustomerScanItem {
 		return total;
 	}
 	
+	/*
+	 * 	Returns the list of scanned items
+	 */
 	public ArrayList<BarcodedItem> getScannedItems(){
 		return scannedItems;
 	}

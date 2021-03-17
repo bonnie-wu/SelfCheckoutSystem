@@ -26,6 +26,7 @@ import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 public class SoftwareMain {
 	
+	private boolean payMode = false;
 	public ArrayList<BarcodedItem> previouslyScannedItems;
 	public ProductDatabases productDatabase;
 	public SelfCheckoutStation station;
@@ -33,10 +34,13 @@ public class SoftwareMain {
 	public CustomerPayment customerPayment;
 	
 	SoftwareMain(){
+		payMode = false;
 		initialize();
 	}
 	
 	SoftwareMain(SelfCheckoutStation station, ArrayList<BarcodedItem> previouslyScannedItems){
+		payMode = false;
+		
 		if(station == null)
 			throw new SimulationException("Station is null");
 		
@@ -49,6 +53,8 @@ public class SoftwareMain {
 	}
 
 	public void Pay(Coin coin) {
+		payMode = true;
+		
 		updateScannedProducts();
 		
 		try {
@@ -60,6 +66,8 @@ public class SoftwareMain {
 	}
 	
 	public void Pay(Banknote banknote) {
+		payMode = true;
+		
 		updateScannedProducts();
 		
 		try {
@@ -71,11 +79,13 @@ public class SoftwareMain {
 	}
 	
 	public void ScanMain(BarcodedItem item) {
-		customerScanItem.scanItemMain(item);
+		if(!payMode)
+			customerScanItem.scanItemMain(item);
 	}
 	
 	public void ScanHeld(BarcodedItem item) {
-		customerScanItem.scanItemHeld(item);
+		if(!payMode)
+			customerScanItem.scanItemHeld(item);
 	}
 	
 	public void Bag(BarcodedItem item) {
@@ -211,5 +221,12 @@ public class SoftwareMain {
 	
 	public SelfCheckoutStation getStation() {
 		return station;
+	}
+	
+	public void reset() {
+		payMode = false;
+		
+		customerScanItem.clearScannedItems();
+		updateScannedProducts();
 	}
 }
