@@ -94,6 +94,9 @@ public class CustomerScanItem {
 		if(baggingScale.isDisabled())
 			throw new SimulationException("Bagging are scale is disabled, item not added.");
 
+		if(baggingScale.getCurrentWeight() + item.getWeight() > baggingScale.getWeightLimit())
+			throw new SimulationException("Cannot place item in bagging area, weight limit will be exceeded.");
+		
 		if(scannedItemWeights() < baggingScale.getCurrentWeight() + item.getWeight())
 			throw new SimulationException("Unidentified object in bagging area, please remove.");
 		
