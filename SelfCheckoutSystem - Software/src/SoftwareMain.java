@@ -1,3 +1,12 @@
+/*
+ * 	Class:			SoftwareMain.java
+ * 	Description:	A main class that initializes the functionality of CustomerPayment.java
+ * 					and CustomerScanItem.java, tying the two functionalities together. Also
+ * 					implements additional initialization options for testing.
+ * 	Date:			3/17/2021
+ * 	Authors: 		Derek Urban, Bonnie Wu
+ */
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,25 +35,35 @@ import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 public class SoftwareMain {
 	
-	//Global Variables
+	//Flag to indicate whether the user is paying, or scanning items
 	private boolean payMode = false;
+	
+	//Global variables
 	public ArrayList<BarcodedItem> previouslyScannedItems;
 	public ProductDatabases productDatabase;
 	public SelfCheckoutStation station;
 	public CustomerScanItem customerScanItem;
 	public CustomerPayment customerPayment;
 	
-	/*
-	 * Default Constructor that initializes the SelfCheckoutStation and ProductDatabase
+	/**
+	 * Default Constructor that initializes a station and default listeners, intended for testing use
 	 */
 	SoftwareMain(){
 		payMode = false;
 		initialize();
 	}
 	
-	/*
-	 * Constructor that allows external initialization of SelfCheckoutStation and previouslyScannedItems
-	 * Note: populateDatabase must be called by external source for proper usage
+	/**
+	 * Constructor that requires a prebuilt SelfCheckotStation and list of previouslyScannedItems, intended for testing use
+	 * 
+	 * @param SelfCheckoutStation station
+	 * 			The station used by CustomerPayment.java and CustomerScanItem.java
+	 * 
+	 * @param ArrayList<BarcodedItem> previouslyScannedItems
+	 * 			The list of BarcodedItems that have been previously scanned, used by CustomerScanItem.java
+	 * 
+	 * @throws SimulationException
+	 * 			If any of the parameters are null
 	 */
 	SoftwareMain(SelfCheckoutStation station, ArrayList<BarcodedItem> previouslyScannedItems){
 		payMode = false;
@@ -60,9 +79,11 @@ public class SoftwareMain {
 		customerPayment = new CustomerPayment(new ArrayList<BarcodedProduct>(), station);
 	}
 
-	/*
-	 * Allows user to make payment with a given coin
-	 * Enables payMode, disallowing customer to continue scanning items
+	/**
+	 * Pay with coin, updates the list of scanned products and enables "payMode"
+	 * 
+	 * @param Coin coin
+	 * 			The coin to pay with
 	 */
 	public void Pay(Coin coin) {
 		payMode = true;
@@ -77,9 +98,11 @@ public class SoftwareMain {
 		}
 	}
 	
-	/*
-	 * Allows user to make payment with a given banknote
-	 * Enables payMode, disallowing customer to continue scanning items
+	/**
+	 * Pay with banknote, updates the list of scanned products and enables "payMode"
+	 * 
+	 * @param Banknote
+	 * 			The banknote to pay with
 	 */
 	public void Pay(Banknote banknote) {
 		payMode = true;
@@ -94,23 +117,23 @@ public class SoftwareMain {
 		}
 	}
 	
-	/*
-	 * Scans an item with the main scanner
+	/**
+	 * Scans an item using the main scanner if payMode isn't enabled
 	 */
 	public void ScanMain(BarcodedItem item) {
 		if(!payMode)
 			customerScanItem.scanItemMain(item);
 	}
 	
-	/*
-	 * Scans an item with the hand held scanner
+	/**
+	 * Scans an item using the hand held scanner if payMode isn't enabled
 	 */
 	public void ScanHeld(BarcodedItem item) {
 		if(!payMode)
 			customerScanItem.scanItemHeld(item);
 	}
 	
-	/*
+	/**
 	 * Places an item in the bagging area
 	 */
 	public void Bag(BarcodedItem item) {
@@ -122,8 +145,10 @@ public class SoftwareMain {
 		}
 	}
 	
-	/*
-	 * Default initialization of SoftwareMain components
+	/**
+	 * Initializes a SelfCheckoutStation to be used, as well as populating the previously scanned list, and
+	 * productDatabase, used by CustomerPayment.java. Also initializes default listeners to be registered by
+	 * hardware components
 	 */
 	public void initialize() {
 		Currency currency = Currency.getInstance(Locale.CANADA);
@@ -139,7 +164,7 @@ public class SoftwareMain {
 		
 		station = new SelfCheckoutStation(currency, banknoteDenominations, coinDenominations, scaleMaximumWeight, scaleSensitivity);
 		
-		//initializeListeners(station.mainScanner, station.handheldScanner, station.coinValidator, station.baggingArea, station.banknoteValidator);
+		initializeListeners(station.mainScanner, station.handheldScanner, station.coinValidator, station.baggingArea, station.banknoteValidator);
 		
 		BarcodedItem itemList[] = {		new BarcodedItem(new Barcode("012345"), 500),	
 										new BarcodedItem(new Barcode("012346"), 2000)
@@ -159,8 +184,8 @@ public class SoftwareMain {
 		customerPayment = new CustomerPayment(convertItemToProduct(previouslyScannedItems), station);
 	}
 	
-	/*
-	 * Default initialization of SoftwareMain listeners
+	/**
+	 * Initializes default listeners used by the default SelfCheckoutStation
 	 */
 	private void initializeListeners(BarcodeScanner mainScanner, BarcodeScanner heldScanner, CoinValidator coinValidator, 
 									 ElectronicScale baggingArea, BanknoteValidator banknoteValidator) {
@@ -217,10 +242,20 @@ public class SoftwareMain {
 		});
 	}
 
-	/*
-	 * Populates the product database with a given list of barcoded products
+	/**
+	 * Populates the database of the SelfCheckoutStation based off a list of BarcodedProducts.
+	 * Clears the database prior to population.
+	 * 
+	 * @param ArrayList<BarcodedProduct> list
+	 * 			The list of products to be added into the database
+	 * 
+	 * @throws SimulationException
+	 * 			If the list provided is null
 	 */
 	public void populateDatabase(ArrayList<BarcodedProduct> list) {
+		if(list == null)
+			throw new SimulationException("Can't populate database with null list");
+		
 		productDatabase.BARCODED_PRODUCT_DATABASE.clear();
 		
 		for(BarcodedProduct product : list) {
@@ -228,11 +263,24 @@ public class SoftwareMain {
 		}
 	}
 	
-	/*
-	 * Converts a list of BarcodedItems into a list of BarcodedProducts by utilizing the product database
-	 * Throws an exception if the product isn't found in the database (can't complete the task)
+	/**
+	 * Converts a list of BarcodedItems into a list of BarcodedProducts based off the product database
+	 * 
+	 * @param ArrayList<BarcodedItem> list
+	 * 			The list of items to be converted to products
+	 * 
+	 * @return ArrayList<BarcodedProduct> productList
+	 * 			The list of products converted from items based off the product database
+	 * 
+	 * @throws SimulationException
+	 * 			If the list provided is null
+	 * 			If the barcode found in an item isn't in the product database
+	 * 			
 	 */
 	public ArrayList<BarcodedProduct> convertItemToProduct(ArrayList<BarcodedItem> list) {
+		if(list == null)
+			throw new SimulationException("Can't convert null list");
+		
 		ArrayList<BarcodedProduct> productList = new ArrayList<BarcodedProduct>();
 		
 		for(BarcodedItem item : list) {
@@ -245,22 +293,24 @@ public class SoftwareMain {
 		return productList;
 	}
 	
-	/*
-	 * Updates the list of scanned products in the customer payment class
+	/**
+	 * Updates the list of scanned products in CustomerPayment.java from CustomerScanItem.java
 	 */
 	public void updateScannedProducts() {
 		customerPayment.updateScannedProducts(convertItemToProduct(customerScanItem.getScannedItems()));
 	}
 	
-	/*
-	 * Returns the SelfCheckoutStation used by this class
+	/**
+	 * Getter for the SelfCheckoutStation used by the program
+	 * 
+	 * @return SelfCheckoutStation station
 	 */
 	public SelfCheckoutStation getStation() {
 		return station;
 	}
 	
-	/*
-	 * Resets the station out of payMode
+	/**
+	 * Reset function that disabled payMode and clears the list of scanned items.
 	 */
 	public void reset() {
 		payMode = false;

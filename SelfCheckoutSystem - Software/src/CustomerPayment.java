@@ -1,3 +1,10 @@
+/*
+ * 	Class:			CustomerPayment.java
+ * 	Description:	Handles the functionality of a customer paying with coin or banknote.
+ * 	Date:			3/17/2021
+ * 	Authors: 		Derek Urban, Bonnie Wu
+ */
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -23,9 +30,11 @@ import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 public class CustomerPayment {
 	
+	//Listener flags, used by the system to record listener responses
 	private boolean coinPaid = false;
 	private boolean banknotePaid = false;
 	
+	//Global variables
 	private ArrayList<BarcodedProduct> scannedItems;
 	private float total;
 	private SelfCheckoutStation station;
@@ -51,15 +60,21 @@ public class CustomerPayment {
 		initListeners();
 	}
 	
+	/**
+	 * Initializes the listeners used by this class to listen to hardware and ensure use cases are properly
+	 * commenced, such as paying with coin or banknote. Will set flags according to hardware responses
+	 */
 	private void initListeners() {
 		station.coinValidator.register(new CoinValidatorListener(){
 			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
 			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
 			public void validCoinDetected(CoinValidator validator, BigDecimal value) {
-				coinPaid = true;
+				if(validator.equals(station.coinValidator))
+					coinPaid = true;
 			}
 			public void invalidCoinDetected(CoinValidator validator) {
-				coinPaid = false;
+				if(validator.equals(station.coinValidator))
+					coinPaid = false;
 			}
 		});
 		
@@ -67,10 +82,12 @@ public class CustomerPayment {
 			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
 			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
 			public void validBanknoteDetected(BanknoteValidator validator, Currency currency, int value) {
-				banknotePaid = true;
+				if(validator.equals(station.banknoteValidator))
+					banknotePaid = true;
 			}
 			public void invalidBanknoteDetected(BanknoteValidator validator) {
-				banknotePaid = false;
+				if(validator.equals(station.banknoteValidator))
+					banknotePaid = false;
 			}
 		});
 	}

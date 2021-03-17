@@ -1,3 +1,10 @@
+/*
+ * 	Class:			SoftwareMainTest.java
+ * 	Description:	JUnit testing class for SoftwareMain.java
+ * 	Date:			3/17/2021
+ * 	Authors: 		Vianney, Nguyen
+ */
+
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
