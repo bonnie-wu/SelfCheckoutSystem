@@ -1,15 +1,28 @@
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Currency;
 
+import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
+import org.lsmr.selfcheckout.devices.AbstractDevice;
+import org.lsmr.selfcheckout.devices.BanknoteValidator;
 import org.lsmr.selfcheckout.devices.BarcodeScanner;
+import org.lsmr.selfcheckout.devices.CoinValidator;
 import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.OverloadException;
 import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.devices.listeners.AbstractDeviceListener;
+import org.lsmr.selfcheckout.devices.listeners.BanknoteValidatorListener;
+import org.lsmr.selfcheckout.devices.listeners.BarcodeScannerListener;
+import org.lsmr.selfcheckout.devices.listeners.CoinValidatorListener;
+import org.lsmr.selfcheckout.devices.listeners.ElectronicScaleListener;
 
 public class CustomerScanItem {
 	
 	//Initializing global variables used to scan items or place items in bagging area.
+	private boolean itemScanned = false;
+	
 	private ArrayList<BarcodedItem> scannedItems;
 	private BarcodeScanner scannerMain;
 	private BarcodeScanner scannerHeld;
@@ -39,6 +52,8 @@ public class CustomerScanItem {
 		this.scannerHeld = scannerHeld;
 		this.baggingScale = baggingScale;
 		scannedItems = previouslyScannedItems;
+		
+		initListeners();
 	}
 	
 	/*
@@ -59,6 +74,26 @@ public class CustomerScanItem {
 		this.scannerHeld = scannerHeld;
 		this.baggingScale = baggingScale;
 		scannedItems = new ArrayList<BarcodedItem>();
+		
+		initListeners();
+	}
+	
+	private void initListeners() {
+		scannerMain.register(new BarcodeScannerListener() {
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
+				itemScanned = true;
+			}
+		});
+		
+		scannerHeld.register(new BarcodeScannerListener(){
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
+				itemScanned = true;
+			}
+		});
 	}
 	
 	/*
@@ -66,14 +101,17 @@ public class CustomerScanItem {
 	 *  It completes this task by calling the main scanner in SelfCheckoutStation, which will notify it's listeners upon successful scan
 	 */
 	public void scanItemMain(BarcodedItem item) {
+		itemScanned = false;
+		
 		if(item == null)
 			throw new SimulationException("Can't scan item, item is null.");
 		
 		if(scannerMain.isDisabled())
 			throw new SimulationException("Can't scan item, Scanner is disabled.");
-		
 		scannerMain.scan(item);
-		scannedItems.add(item);
+		
+		if(itemScanned)
+			scannedItems.add(item);
 	}
 	
 	/*
@@ -81,6 +119,8 @@ public class CustomerScanItem {
 	 *  It completes this task by calling the hand held scanner in SelfCheckoutStation, which will notify it's listeners upon successful scan
 	 */
 	public void scanItemHeld(BarcodedItem item) {
+		itemScanned = false;
+		
 		if(item == null)
 			throw new SimulationException("Can't scan item, item is null.");
 		
@@ -88,7 +128,9 @@ public class CustomerScanItem {
 			throw new SimulationException("Can't scan item, Scanner is disabled.");
 		
 		scannerHeld.scan(item);
-		scannedItems.add(item);
+		
+		if(itemScanned)
+			scannedItems.add(item);
 	}
 	
 	/*
@@ -101,7 +143,7 @@ public class CustomerScanItem {
 			throw new SimulationException("Can't place null item in bagging area.");
 		
 		if(baggingScale.isDisabled())
-			throw new SimulationException("Bagging are scale is disabled, item not added.");
+			throw new SimulationException("Bagging scale is disabled, item not added.");
 
 		if(baggingScale.getCurrentWeight() + item.getWeight() > baggingScale.getWeightLimit())
 			throw new SimulationException("Cannot place item in bagging area, weight limit will be exceeded.");

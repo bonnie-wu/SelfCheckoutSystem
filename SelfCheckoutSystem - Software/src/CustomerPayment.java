@@ -1,16 +1,31 @@
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Currency;
 
 import org.lsmr.selfcheckout.Banknote;
+import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.Coin;
+import org.lsmr.selfcheckout.devices.AbstractDevice;
+import org.lsmr.selfcheckout.devices.BanknoteValidator;
+import org.lsmr.selfcheckout.devices.BarcodeScanner;
+import org.lsmr.selfcheckout.devices.CoinValidator;
 import org.lsmr.selfcheckout.devices.DisabledException;
+import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.devices.listeners.AbstractDeviceListener;
+import org.lsmr.selfcheckout.devices.listeners.BanknoteValidatorListener;
+import org.lsmr.selfcheckout.devices.listeners.BarcodeScannerListener;
+import org.lsmr.selfcheckout.devices.listeners.CoinValidatorListener;
+import org.lsmr.selfcheckout.devices.listeners.ElectronicScaleListener;
 import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 
 public class CustomerPayment {
-
+	
+	private boolean coinPaid = false;
+	private boolean banknotePaid = false;
+	
 	private ArrayList<BarcodedProduct> scannedItems;
 	private float total;
 	private SelfCheckoutStation station;
@@ -32,6 +47,32 @@ public class CustomerPayment {
 		this.scannedItems = scannedItems;
 		this.station = station;
 		total();
+		
+		initListeners();
+	}
+	
+	private void initListeners() {
+		station.coinValidator.register(new CoinValidatorListener(){
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void validCoinDetected(CoinValidator validator, BigDecimal value) {
+				coinPaid = true;
+			}
+			public void invalidCoinDetected(CoinValidator validator) {
+				coinPaid = false;
+			}
+		});
+		
+		station.banknoteValidator.register(new BanknoteValidatorListener(){
+			public void enabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void disabled(AbstractDevice<? extends AbstractDeviceListener> device) {}
+			public void validBanknoteDetected(BanknoteValidator validator, Currency currency, int value) {
+				banknotePaid = true;
+			}
+			public void invalidBanknoteDetected(BanknoteValidator validator) {
+				banknotePaid = false;
+			}
+		});
 	}
 
 	/**
@@ -55,6 +96,8 @@ public class CustomerPayment {
 	 * @throws DisabledException occurs when the coin is null
 	 */
 	public void PayCoin(Coin coin) throws DisabledException{
+		coinPaid = false;
+		
 		if(coin == null) {
 			throw new SimulationException("Coin is null");
 		}
@@ -66,7 +109,7 @@ public class CustomerPayment {
 		
 		station.coinValidator.accept(coin);
 		
-		if(coinCount != station.coinStorage.getCoinCount())
+		if(coinPaid)
 			total -= coin.getValue().floatValue();
 	}
 	
@@ -79,6 +122,8 @@ public class CustomerPayment {
 	 * @throws DisabledException occurs when the banknote is null
 	 */
 	public void PayBanknote(Banknote banknote) throws DisabledException{
+		banknotePaid = false;
+		
 		if(banknote == null) {
 			throw new SimulationException("Banknote is null");
 		}
@@ -90,7 +135,7 @@ public class CustomerPayment {
 		
 		station.banknoteValidator.accept(banknote);
 		
-		if(banknoteCount != station.banknoteStorage.getBanknoteCount())
+		if(banknotePaid)
 			total -= banknote.getValue();
 	}
 	
