@@ -60,7 +60,7 @@ public class CustomerPayment {
 		}
 		
 		int capacity = station.coinStorage.getCoinCount();
-		
+		//Test
 		station.coinValidator.accept(coin);
 		
 		if(capacity != station.coinStorage.getCoinCount())
