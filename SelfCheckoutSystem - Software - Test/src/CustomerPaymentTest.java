@@ -187,6 +187,27 @@ public class CustomerPaymentTest {
 		
 	}
 	
+	
+	/**
+	 * Verify that a coin is delivered to its correct sink
+	 * @throws DisabledException
+	 */
+	@Test
+	public void testCorrectCoinSink() throws DisabledException {
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+				newProduct("01234", 15.2)
+		}));
+		
+		// pay
+		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
+		payment.PayBanknote(new Banknote(10, getCurrency()));
+		
+		// scan more items
+		payment.updateScannedProducts(scannedProducts);
+		
+		assertEquals(15.2-10, payment.getTotal(), 0.0001);
+		
+	}
 
 	/**
 	 * For full coverage
