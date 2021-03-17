@@ -35,7 +35,8 @@ public class CustomerPayment {
 	}
 
 	/**
-	 * Calculates the price total for all the scanned items in scannedItems
+	 * Calculates the price total for all the scanned items in scannedItems by 
+	 * iterating through the whole list
 	 */
 	public void total() {
 		total = 0;
@@ -47,6 +48,8 @@ public class CustomerPayment {
 	
 	/**
 	 * Method for the customer to pay with a coin
+	 * Checks the capacity of the coin storage and attempt to accept coin
+	 * Only when there is space in the storage, update the total
 	 * 
 	 * @param coin Type Coin of the coin that is being used to pay with
 	 * @throws DisabledException occurs when the coin is null
@@ -66,6 +69,8 @@ public class CustomerPayment {
 	
 	/**
 	 * Method for the customer to pay with a banknote
+	 * checks the capacity of the banknote storage and attempt to accept banknote
+	 * Only when there is space in the storage, update the total
 	 * 
 	 * @param banknote Type Banknote of the banknote that is being used to pay with
 	 * @throws DisabledException occurs when the banknote is null
