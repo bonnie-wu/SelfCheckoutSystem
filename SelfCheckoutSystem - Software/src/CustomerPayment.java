@@ -59,11 +59,14 @@ public class CustomerPayment {
 			throw new SimulationException("Coin is null");
 		}
 		
-		int capacity = station.coinStorage.getCoinCount();
-		//Test
+		int coinCount = station.coinStorage.getCoinCount();
+		
+		if(station.coinStorage.getCapacity() == coinCount)
+			throw new SimulationException("Cannot deliver coin, coin storage is full!");
+		
 		station.coinValidator.accept(coin);
 		
-		if(capacity != station.coinStorage.getCoinCount())
+		if(coinCount != station.coinStorage.getCoinCount())
 			total -= coin.getValue().floatValue();
 	}
 	
@@ -80,11 +83,14 @@ public class CustomerPayment {
 			throw new SimulationException("Banknote is null");
 		}
 		
-		int capacity = station.banknoteStorage.getBanknoteCount();
+		int banknoteCount = station.banknoteStorage.getBanknoteCount();
+		
+		if(station.banknoteStorage.getCapacity() == banknoteCount)
+			throw new SimulationException("Cannot deliver banknote, banknote storage is full!");
 		
 		station.banknoteValidator.accept(banknote);
 		
-		if(capacity != station.banknoteStorage.getBanknoteCount())
+		if(banknoteCount != station.banknoteStorage.getBanknoteCount())
 			total -= banknote.getValue();
 	}
 	
