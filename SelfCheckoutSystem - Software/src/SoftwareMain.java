@@ -121,6 +121,7 @@ public class SoftwareMain {
 	 * Scans an item using the main scanner if payMode isn't enabled
 	 */
 	public void ScanMain(BarcodedItem item) {
+		
 		if(!payMode)
 			customerScanItem.scanItemMain(item);
 	}
@@ -129,6 +130,7 @@ public class SoftwareMain {
 	 * Scans an item using the hand held scanner if payMode isn't enabled
 	 */
 	public void ScanHeld(BarcodedItem item) {
+		
 		if(!payMode)
 			customerScanItem.scanItemHeld(item);
 	}

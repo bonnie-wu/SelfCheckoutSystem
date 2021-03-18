@@ -64,8 +64,8 @@ public class CustomerScanItem {
 		if(previouslyScannedItems == null)
 			throw new SimulationException("List of previously scanned items is null");
 		
-		if(previouslyScannedItems.size() == 0)
-			throw new SimulationException("List of previously scanned items is empty");
+		//if(previouslyScannedItems.size() == 0)
+		//	throw new SimulationException("List of previously scanned items is empty");
 		
 		this.scannerMain = scannerMain;
 		this.scannerHeld = scannerHeld;

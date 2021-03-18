@@ -15,6 +15,7 @@ import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.lsmr.selfcheckout.Banknote;
 import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
 import org.lsmr.selfcheckout.Coin;
@@ -73,6 +74,7 @@ public class SoftwareMainTest {
 		
 		main.populateDatabase(databaseProducts);
 		
+		// Scan extra items
 		main.ScanMain(newItem("01234567", 1020));
 		main.ScanMain(newItem("012345678", 1050));
 		
@@ -185,6 +187,30 @@ public class SoftwareMainTest {
 			main.ScanHeld(newItem("010101", 5));
 		} catch (Exception e){}
 		assertEquals(5, listener.scanned);
+	}
+	
+	@Test
+	public void testCannotScanAfterPayingWithBanknote() {
+		ArrayList<BarcodedProduct> databaseProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+				newProduct("01234", 4.50)
+		}));
+		
+		SoftwareMain main = new SoftwareMain(station, new ArrayList<>());
+		main.populateDatabase(databaseProducts);
+		
+		// Scan, then pay
+		main.ScanMain(newItem("01234", 1));
+		main.updateScannedProducts();
+		main.Pay(new Banknote(5, Currency.getInstance(Locale.CANADA)));
+		
+		// Attempt to scan again
+		main.ScanHeld(newItem("01234", 1));
+		try {
+			main.updateScannedProducts();
+		} catch (Exception e){ /* expected */ }
+		
+		// Verify nothing changed
+		assertEquals(0, main.customerPayment.getTotal(), 0.0001);
 	}
 	
 	private BarcodedProduct newProduct(String barcode, double price) {
