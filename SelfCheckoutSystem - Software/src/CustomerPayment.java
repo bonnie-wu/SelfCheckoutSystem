@@ -34,6 +34,9 @@ public class CustomerPayment {
 	private boolean coinPaid = false;
 	private boolean banknotePaid = false;
 	
+	// used to indicate if the user attempted to pay. if so then they cannot scan more items
+	private boolean canScan = true;
+	
 	//Global variables
 	private ArrayList<BarcodedProduct> scannedItems;
 	private float total;
@@ -113,6 +116,8 @@ public class CustomerPayment {
 	 * @throws DisabledException occurs when the coin is null
 	 */
 	public void PayCoin(Coin coin) throws DisabledException{
+		canScan = false;
+		
 		coinPaid = false;
 		
 		if(coin == null) {
@@ -139,6 +144,8 @@ public class CustomerPayment {
 	 * @throws DisabledException occurs when the banknote is null
 	 */
 	public void PayBanknote(Banknote banknote) throws DisabledException{
+		canScan = false;
+		
 		banknotePaid = false;
 		
 		if(banknote == null) {
@@ -153,7 +160,7 @@ public class CustomerPayment {
 		station.banknoteValidator.accept(banknote);
 		
 		if(banknotePaid)
-			total -= banknote.getValue();
+			total = Math.max(total - banknote.getValue(), 0.0f);
 	}
 	
 	
@@ -180,6 +187,7 @@ public class CustomerPayment {
 	public void updateScannedProducts(ArrayList<BarcodedProduct> scannedProducts) {
 		if(scannedProducts == null)
 			throw new SimulationException("Can't update scanned products, input is null");
+		if (!canScan) throw new SimulationException("Attempted to scan while paying");
 		
 		scannedItems = scannedProducts;
 		total();

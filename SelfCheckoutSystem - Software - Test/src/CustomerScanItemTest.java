@@ -132,6 +132,7 @@ public class CustomerScanItemTest {
 		
 	}
 	
+	
 	private BarcodedItem newBarcodedItem(String barcode, double weight) {
 		return new BarcodedItem(new Barcode(barcode), 1.0);
 	}
