@@ -46,52 +46,6 @@ public class CustomerScanItemTest {
 	}
 	
 	/**
-	 * Test all branches of execution in the code to verify that they have been called.
-	 * @throws DisabledException
-	 */
-	@Test
-	public void testOnErrorIfNull() throws DisabledException{
-		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
-				newBarcodedItem("01234", 1.0)
-		}));
-		
-		try {
-			new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, null);
-			fail("Should throw SimulationException if constructor parameter is null");
-		} catch (SimulationException e) {/*expected*/ }
-		
-		try {
-			new CustomerScanItem(station.mainScanner, station.handheldScanner, null, scannedItems);
-			fail("Should throw SimulationException if constructor parameter is null");
-		} catch (SimulationException e) {/*expected*/ }
-		
-		try {
-			new CustomerScanItem(station.mainScanner, null, station.baggingArea, scannedItems);
-			fail("Should throw SimulationException if constructor parameter is null");
-		} catch (SimulationException e) {/*expected*/ }
-		
-		try {
-			new CustomerScanItem(null, station.handheldScanner, station.baggingArea, scannedItems);
-			fail("Should throw SimulationException if constructor parameter is null");
-		} catch (SimulationException e) {/*expected*/ }
-		
-		try {
-			new CustomerScanItem(station.mainScanner, station.handheldScanner, null);
-			fail("Should throw SimulationException if constructor parameter is null");
-		} catch (SimulationException e) {/*expected*/ }
-		
-		try {
-			new CustomerScanItem(station.mainScanner, null, station.baggingArea);
-			fail("Should throw SimulationException if constructor parameter is null");
-		} catch (SimulationException e) {/*expected*/ }
-		
-		try {
-			new CustomerScanItem(null, station.handheldScanner, station.baggingArea);
-			fail("Should throw SimulationException if constructor parameter is null");
-		} catch (SimulationException e) {/*expected*/ }
-	}
-
-	/**
 	 * Checks if the customer can scan using the main scanner
 	 */
 	@Test
@@ -115,6 +69,9 @@ public class CustomerScanItemTest {
 	 */
 	@Test
 	public void testCanScanWithMultipleScanners() throws OverloadException {
+		customerScan.clearBaggedItems();
+		customerScan.clearScannedItems();
+		
 		BarcodedItem item1 = newBarcodedItem("12345", 1.0);
 		BarcodedItem item2 = newBarcodedItem("22345", 2.0);
 		BarcodedItem item3 = newBarcodedItem("33345", 3.0);
@@ -129,23 +86,6 @@ public class CustomerScanItemTest {
 		customerScan.placeItemInBagging(item3);
 		
 		assertEquals(3, customerScan.getScannedItems().size());
-	}
-	
-	/**
-	 * Verifies that the customer cannot scan multiple items without placing it in the bag
-	 */
-	@Test
-	public void testCannotScanMultipleWithoutBagging() {
-		customerScan.scanItemHeld(newBarcodedItem("12345", 1.0)); // scan first item
-		
-		try {
-			// let's scan more items without bagging it
-			customerScan.scanItemHeld(newBarcodedItem("12345", 1.0));
-			customerScan.scanItemMain(newBarcodedItem("12345", 1.0));
-			
-			fail("Customer was able to scan multiple items without bagging it.");
-		} catch (Exception e) {
-		}
 	}
 	
 	/**
@@ -182,7 +122,151 @@ public class CustomerScanItemTest {
 		}
 		
 	}
+	@Test
+	public void testFunctionParameters() throws DisabledException, OverloadException{
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<BarcodedItem>();
+		
+		try {
+			new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, null);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, station.handheldScanner, null, scannedItems);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, null, station.baggingArea, scannedItems);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(null, station.handheldScanner, station.baggingArea, scannedItems);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, scannedItems);
+			fail("Should throw SimulationException if previously scanned items is an empty list");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, station.handheldScanner, null);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, null, station.baggingArea);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(null, station.handheldScanner, station.baggingArea);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			customerScan.placeItemInBagging(null);
+			fail("Should throw SimulationException if placeItemInBagging parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			customerScan.removeItemFromBagging(null);
+			fail("Should throw SimulationException if removeItemFromBagging parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			customerScan.removeScannedItem(null);
+			fail("Should throw SimulationException if removeScannedItem parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			customerScan.scanItemHeld(null);
+			fail("Should throw SimulationException if scanItemHeld parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			customerScan.scanItemMain(null);
+			fail("Should throw SimulationException if scanItemMain parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+	}
+
+	@Test
+	public void testScanClear() {
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				newBarcodedItem("01234", 1.0),
+				newBarcodedItem("012524", 3.0),
+		}));
+		
+		CustomerScanItem customerScanItem = 
+		new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, scannedItems);
+		
+		customerScanItem.clearScannedItems();
+		
+		assertEquals(customerScanItem.getScannedItems().size(), 0);
+	}
 	
+	@Test
+	public void testBaggingClear() throws OverloadException{
+		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
+		BarcodedItem item2 = newBarcodedItem("012524", 3.0);
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				item1,
+				item2
+		}));
+		
+		CustomerScanItem customerScanItem = 
+		new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, scannedItems);
+		
+		customerScanItem.placeItemInBagging(item1);
+		customerScanItem.placeItemInBagging(item2);
+		
+		customerScanItem.clearBaggedItems();
+		
+		assertEquals(station.baggingArea.getCurrentWeight(), 0.0, 0.01);
+	}
+	
+	@Test
+	public void testOverload() throws OverloadException{
+		BarcodedItem item1 = newBarcodedItem("01234", 1000.0);
+		BarcodedItem item2 = newBarcodedItem("012345", 1000.0);
+		
+		try {
+			customerScan.clearBaggedItems();
+			customerScan.clearScannedItems();
+			customerScan.scanItemHeld(item1);
+			customerScan.scanItemMain(item2);
+			customerScan.placeItemInBagging(item1);
+			customerScan.placeItemInBagging(item2);
+			System.out.println(station.baggingArea.getCurrentWeight());
+		}
+		catch(SimulationException ex) {return;}
+		fail("Expected OverloadException or SimulationException when bagging area scale exceeds wieght limit.");
+	}
+	
+	@Test
+	public void testScannerDisabled() throws OverloadException{
+		try {
+			station.mainScanner.disable();
+			customerScan.scanItemMain(newBarcodedItem("01234", 1.0));
+			fail("Should throw SimulationException if trying to scan when main scanner is disabled");
+		} catch (SimulationException e) { station.mainScanner.enable(); }
+		
+		try {
+			station.handheldScanner.disable();
+			customerScan.scanItemHeld(newBarcodedItem("01234", 1.0));
+			fail("Should throw SimulationException if trying to scan when hand held scanner is disabled");
+		} catch (SimulationException e) { station.handheldScanner.enable(); }
+		
+		try {
+			BarcodedItem item1 = newBarcodedItem("01234", 1.0);
+			station.baggingArea.disable();
+			customerScan.scanItemHeld(item1);
+			customerScan.placeItemInBagging(item1);
+			fail("Should throw SimulationException if trying to place item in bagging when bagging scale is disabled");
+		} catch (SimulationException e) { station.baggingArea.enable(); }
+	}
 	
 	private BarcodedItem newBarcodedItem(String barcode, double weight) {
 		return new BarcodedItem(new Barcode(barcode), 1.0);
