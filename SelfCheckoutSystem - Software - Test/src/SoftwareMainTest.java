@@ -121,13 +121,10 @@ public class SoftwareMainTest {
 				newProduct("1337", 100)
 		}));
 		
-		SoftwareMain main = new SoftwareMain(station, new ArrayList<>(Arrays.asList(new BarcodedItem[] {
-				newItem("01234", 10)
-		})));
-		main.populateDatabase(databaseProducts);
+		SoftwareMain main = new SoftwareMain();
 		
-		BarcodedItem item1 = newItem("01234", 5);
-		BarcodedItem item2 = newItem("1337", 2);
+		BarcodedItem item1 = newItem("012345", 5);
+		BarcodedItem item2 = newItem("012346", 2);
 		
 		// Test scanning multiple items and see if payment works as expected
 		main.ScanMain(item1); // valid
@@ -144,8 +141,8 @@ public class SoftwareMainTest {
 			main.Pay(new Coin(BigDecimal.valueOf(2.0), Currency.getInstance(Locale.CANADA)));
 			
 			fail("Invalid item");
-		} catch (Exception e) {
 			
+		} catch (Exception e) {
 		}
 	}
 	
