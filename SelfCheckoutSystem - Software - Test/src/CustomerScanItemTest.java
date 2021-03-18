@@ -228,6 +228,29 @@ public class CustomerScanItemTest {
 	}
 	
 	@Test
+	public void testBaggingClear2() throws OverloadException{
+		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
+		BarcodedItem item2 = newBarcodedItem("012524", 3.0);
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				item1,
+				item2
+		}));
+		
+		CustomerScanItem customerScanItem = 
+		new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, scannedItems);
+		
+		station.baggingArea.add(newBarcodedItem("00000", 1.0));
+		
+		customerScanItem.placeItemInBagging(item1);
+		
+		try {
+			customerScanItem.clearBaggedItems();
+		}
+		catch(SimulationException ex) { return; };
+		fail("Expected SimulationExceptin when clearing bagging area, but unscanned item is found.");
+	}
+	
+	@Test
 	public void testWeightExceeded() throws OverloadException{
 		BarcodedItem item1 = newBarcodedItem("01234", 24000.0);
 		BarcodedItem item2 = newBarcodedItem("012345", 1500.0);
