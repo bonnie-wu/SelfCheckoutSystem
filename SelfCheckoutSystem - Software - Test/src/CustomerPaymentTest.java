@@ -44,6 +44,7 @@ import org.lsmr.selfcheckout.products.Product;
 
 public class CustomerPaymentTest {
 
+	private static String BASEDIR = "\\some-path\\";
 	private SelfCheckoutStation station;
 	private int index = 0;
 
