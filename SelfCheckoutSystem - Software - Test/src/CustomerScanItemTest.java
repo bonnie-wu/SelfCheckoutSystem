@@ -309,7 +309,9 @@ public class CustomerScanItemTest {
 		} catch (SimulationException e) { station.baggingArea.enable(); }
 	}
 	
-	
+	/*
+	 * Test to remove an item that was never scanned
+	 */
 	@Test
 	public void testRemoveUnscannedItem() throws SimulationException{
 		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
@@ -328,6 +330,9 @@ public class CustomerScanItemTest {
 		catch(SimulationException e) {/* Expected */};
 	}
 	
+	/*
+	 * Test to remove an item that was scanned
+	 */
 	@Test
 	public void testRemoveScannedItem() throws SimulationException{
 		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
@@ -345,6 +350,9 @@ public class CustomerScanItemTest {
 		assertEquals(0, customerScanItem.getScannedItems().size());
 	}
 	
+	/*
+	 * Test to remove an item that was placed in the bagging area after the baggingArea is disabled
+	 */
 	@Test
 	public void testRemoveBaggedItemDisabled() throws OverloadException{
 		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
@@ -366,6 +374,9 @@ public class CustomerScanItemTest {
 		
 	}
 	
+	/*
+	 * Test to remove an item from bagging area
+	 */
 	@Test
 	public void testRemoveBaggedItem() throws OverloadException{
 		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
