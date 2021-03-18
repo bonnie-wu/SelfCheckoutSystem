@@ -25,6 +25,7 @@ import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 public class CustomerScanItemTest {
 	
+	private static String BASEDIR = "\\some-path\\";
 	CustomerScanItem customerScan;
 	SelfCheckoutStation station;
 	
