@@ -309,28 +309,6 @@ public class CustomerScanItemTest {
 		} catch (SimulationException e) { station.baggingArea.enable(); }
 	}
 	
-	@Test
-	public void testScannerDisabled() throws OverloadException{
-		try {
-			station.mainScanner.disable();
-			customerScan.scanItemMain(newBarcodedItem("01234", 1.0));
-			fail("Should throw SimulationException if trying to scan when main scanner is disabled");
-		} catch (SimulationException e) { station.mainScanner.enable(); }
-		
-		try {
-			station.handheldScanner.disable();
-			customerScan.scanItemHeld(newBarcodedItem("01234", 1.0));
-			fail("Should throw SimulationException if trying to scan when hand held scanner is disabled");
-		} catch (SimulationException e) { station.handheldScanner.enable(); }
-		
-		try {
-			BarcodedItem item1 = newBarcodedItem("01234", 1.0);
-			station.baggingArea.disable();
-			customerScan.scanItemHeld(item1);
-			customerScan.placeItemInBagging(item1);
-			fail("Should throw SimulationException if trying to place item in bagging when bagging scale is disabled");
-		} catch (SimulationException e) { station.baggingArea.enable(); }
-	}
 	
 	@Test
 	public void testRemoveUnscannedItem() throws SimulationException{
