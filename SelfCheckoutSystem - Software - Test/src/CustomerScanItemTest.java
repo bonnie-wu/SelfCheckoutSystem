@@ -45,6 +45,10 @@ public class CustomerScanItemTest {
 		customerScan = new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea);
 	}
 	
+	/**
+	 * Test all branches of execution in the code to verify that they have been called.
+	 * @throws DisabledException
+	 */
 	@Test
 	public void testOnErrorIfNull() throws DisabledException{
 		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {

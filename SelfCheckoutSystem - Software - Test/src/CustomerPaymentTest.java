@@ -65,6 +65,11 @@ public class CustomerPaymentTest {
 		station = new SelfCheckoutStation(currency, banknoteDenominations, coinDenominations, scaleMaximumWeight, scaleSensitivity);
 	}
 	
+	/**
+	 * Verifies that the coin storage can become full - this implies that the coin listener is
+	 * working as intended
+	 * @throws DisabledException
+	 */
 	@Test
 	public void testMaxCoinStorage() throws DisabledException{
 		int maxLoop = 10000;
@@ -73,6 +78,7 @@ public class CustomerPaymentTest {
 		}));
 		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
 		
+		// repeatedly insert coins until it becomes full
 		for(int i = 0; i < maxLoop; i++) {
 			try {
 				payment.PayCoin(new Coin(BigDecimal.valueOf(1.00), getCurrency()));
@@ -83,6 +89,11 @@ public class CustomerPaymentTest {
 		fail("Coin storage should be full and throw SimulationException");
 	}
 	
+	/**
+	 * Checks to see if the banknote storage has proper code set up so that it can let the software
+	 * know if it becomes full.
+	 * @throws DisabledException
+	 */
 	@Test
 	public void testMaxBanknoteStorage() throws DisabledException{
 		int maxLoop = 10000;
@@ -91,6 +102,7 @@ public class CustomerPaymentTest {
 		}));
 		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
 		
+		// repeatedly insert banknotes until full
 		for(int i = 0; i < maxLoop; i++) {
 			try {
 				payment.PayBanknote(new Banknote(5, getCurrency()));
@@ -102,28 +114,35 @@ public class CustomerPaymentTest {
 		fail("Banknote storage should be full and throw SimulationException");
 	}
 	
+	/**
+	 * Test to see if an error arises from attempting to pay with coins without scanning any items
+	 * @throws DisabledException
+	 */
 	@Test
 	public void testPayWhenNothingScanned1() throws DisabledException{
-		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
-		}));
-		
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(); // nothing scanned
 		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
 		
+		// pay without scanning
 		try {
 			payment.PayCoin(new Coin(BigDecimal.valueOf(1.00), getCurrency()));
 		}
 		catch(SimulationException ex) { return; }
 		
+		// no exception -> machine accepted payment => fail
 		fail("Expected SimulationException");
 	}
 	
+	/**
+	 * Test to see if an error arises from attempting to pay with banknotes without scanning any items
+	 * @throws DisabledException
+	 */
 	@Test
 	public void testPayWhenNothingScanned2() throws DisabledException{
-		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
-		}));
-		
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>();
 		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
 		
+		// pay without scanning
 		try {
 			payment.PayBanknote(new Banknote(5, getCurrency())); // pay with banknote
 		}
