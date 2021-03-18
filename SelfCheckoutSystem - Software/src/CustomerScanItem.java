@@ -160,6 +160,7 @@ public class CustomerScanItem {
 	 * 			If the bagging area is overloading weight and needs to be cleared before proceeding
 	 */
 	public void scanItemMain(BarcodedItem item) {
+		
 		itemScanned = false;
 		
 		if(item == null)

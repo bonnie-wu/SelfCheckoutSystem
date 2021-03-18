@@ -260,7 +260,7 @@ public class CustomerPaymentTest {
 	}
 	
 	/**
-	 * Verifies that paying over the amount doesn't bring the total below 0
+	 * Verifies that paying over the amount with banknotes doesn't bring the total below 0
 	 * @throws DisabledException 
 	 */
 	@Test
@@ -275,6 +275,10 @@ public class CustomerPaymentTest {
 		assertEquals(payment.getTotal() >= 0, true);
 	}
 	
+	/**
+	 * Verifies that paying over the amount with coins doesn't bring the total below 0
+	 * @throws DisabledException 
+	 */
 	@Test
 	public void testOverPayment2() throws DisabledException {
 		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
@@ -380,7 +384,7 @@ public class CustomerPaymentTest {
 	}
 	
 	/**
-	 * For full coverage
+	 * Test other branches of execution to see that each branch has been called
 	 */
 	@Test
 	public void testOnErrorIfNull() throws DisabledException{
@@ -414,12 +418,23 @@ public class CustomerPaymentTest {
 		} catch (SimulationException e) {/*expected*/}
 	}
 	
-	
+	/**
+	 * Helper method that generates a BarcodedProduct given the barcode and the price
+	 * @param barcode the barcode string
+	 * @param price   the price of the item
+	 * @return		  a BarcodedProduct instance
+	 */
 	private BarcodedProduct newProduct(String barcode, double price) {
 		index++;
 		return new BarcodedProduct(new Barcode(barcode), "Test Product" + index, new BigDecimal(price));
 	}
 	
+	/**
+	 * Returns the currency used.
+	 * 
+	 * This exists so that the test cases know what currency the software expects.
+	 * @return
+	 */
 	private Currency getCurrency() {
 		return Currency.getInstance(Locale.CANADA);
 	}
