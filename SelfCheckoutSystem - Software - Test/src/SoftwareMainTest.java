@@ -140,10 +140,13 @@ public class SoftwareMainTest {
 		} catch (Exception e){}
 
 		// Pay $2
-		main.Pay(new Coin(BigDecimal.valueOf(2.0), Currency.getInstance(Locale.CANADA)));
-		
-		// verify that it's correct
-		assertEquals(4.50+(4.50+100)-2.0, main.customerPayment.getTotal(), 0.000001);
+		try {
+			main.Pay(new Coin(BigDecimal.valueOf(2.0), Currency.getInstance(Locale.CANADA)));
+			
+			fail("Invalid item");
+		} catch (Exception e) {
+			
+		}
 	}
 	
 	/**
