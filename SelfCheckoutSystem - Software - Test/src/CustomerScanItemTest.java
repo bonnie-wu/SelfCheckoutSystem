@@ -228,9 +228,9 @@ public class CustomerScanItemTest {
 	}
 	
 	@Test
-	public void testOverload() throws OverloadException{
-		BarcodedItem item1 = newBarcodedItem("01234", 1000.0);
-		BarcodedItem item2 = newBarcodedItem("012345", 1000.0);
+	public void testWeightExceeded() throws OverloadException{
+		BarcodedItem item1 = newBarcodedItem("01234", 24000.0);
+		BarcodedItem item2 = newBarcodedItem("012345", 1500.0);
 		
 		try {
 			customerScan.clearBaggedItems();
@@ -239,10 +239,28 @@ public class CustomerScanItemTest {
 			customerScan.scanItemMain(item2);
 			customerScan.placeItemInBagging(item1);
 			customerScan.placeItemInBagging(item2);
-			System.out.println(station.baggingArea.getCurrentWeight());
 		}
 		catch(SimulationException ex) {return;}
 		fail("Expected OverloadException or SimulationException when bagging area scale exceeds wieght limit.");
+	}
+	
+	@Test
+	public void testOverload() throws OverloadException{
+		station.baggingArea.add(newBarcodedItem("214124", 25001));
+		
+		try {
+			BarcodedItem item1 = newBarcodedItem("01234", 10.0);
+			customerScan.scanItemHeld(item1);
+			fail("Expected SimulationException when trying to scan with an overloaded scale");
+		}
+		catch(SimulationException ex) { /* expected */}
+		
+		try {
+			BarcodedItem item1 = newBarcodedItem("01234", 10.0);
+			customerScan.scanItemMain(item1);
+			fail("Expected SimulationException when trying to scan with an overloaded scale");
+		}
+		catch(SimulationException ex) { /* expected */}
 	}
 	
 	@Test
@@ -269,7 +287,7 @@ public class CustomerScanItemTest {
 	}
 	
 	private BarcodedItem newBarcodedItem(String barcode, double weight) {
-		return new BarcodedItem(new Barcode(barcode), 1.0);
+		return new BarcodedItem(new Barcode(barcode), weight);
 	}
 
 	private Currency getCurrency() {
