@@ -8,6 +8,8 @@
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Currency;
 import java.util.Locale;
 
@@ -15,13 +17,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
+import org.lsmr.selfcheckout.devices.DisabledException;
 import org.lsmr.selfcheckout.devices.OverloadException;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.products.BarcodedProduct;
 
 public class CustomerScanItemTest {
 	
 	CustomerScanItem customerScan;
+	SelfCheckoutStation station;
 	
 	@Before
 	public void setup() {
@@ -36,8 +41,50 @@ public class CustomerScanItemTest {
 		int scaleMaximumWeight = (25*1000);	//Scale maximum in grams
 		int scaleSensitivity = (15);		//Scale sensitivity in grams
 		
-		SelfCheckoutStation station = new SelfCheckoutStation(currency, banknoteDenominations, coinDenominations, scaleMaximumWeight, scaleSensitivity);
+		station = new SelfCheckoutStation(currency, banknoteDenominations, coinDenominations, scaleMaximumWeight, scaleSensitivity);
 		customerScan = new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea);
+	}
+	
+	@Test
+	public void testOnErrorIfNull() throws DisabledException{
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				newBarcodedItem("01234", 1.0)
+		}));
+		
+		try {
+			new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, null);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, station.handheldScanner, null, scannedItems);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, null, station.baggingArea, scannedItems);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(null, station.handheldScanner, station.baggingArea, scannedItems);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, station.handheldScanner, null);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(station.mainScanner, null, station.baggingArea);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
+		
+		try {
+			new CustomerScanItem(null, station.handheldScanner, station.baggingArea);
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
 	}
 
 	/**

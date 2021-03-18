@@ -65,6 +65,73 @@ public class CustomerPaymentTest {
 		station = new SelfCheckoutStation(currency, banknoteDenominations, coinDenominations, scaleMaximumWeight, scaleSensitivity);
 	}
 	
+	@Test
+	public void testMaxCoinStorage() throws DisabledException{
+		int maxLoop = 10000;
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+				newProduct("01234", 1100.0)
+		}));
+		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
+		
+		for(int i = 0; i < maxLoop; i++) {
+			try {
+				payment.PayCoin(new Coin(BigDecimal.valueOf(1.00), getCurrency()));
+			}
+			catch(SimulationException e) { return; }
+		}
+		
+		fail("Coin storage should be full and throw SimulationException");
+	}
+	
+	@Test
+	public void testMaxBanknoteStorage() throws DisabledException{
+		int maxLoop = 10000;
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+				newProduct("01234", 5500.0)
+		}));
+		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
+		
+		for(int i = 0; i < maxLoop; i++) {
+			try {
+				payment.PayBanknote(new Banknote(5, getCurrency()));
+				station.banknoteInput.removeDanglingBanknote();
+			}
+			catch(SimulationException e) { return; }
+		}
+		
+		fail("Banknote storage should be full and throw SimulationException");
+	}
+	
+	@Test
+	public void testPayWhenNothingScanned1() throws DisabledException{
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+		}));
+		
+		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
+		
+		try {
+			payment.PayCoin(new Coin(BigDecimal.valueOf(1.00), getCurrency()));
+		}
+		catch(SimulationException ex) { return; }
+		
+		fail("Expected SimulationException");
+	}
+	
+	@Test
+	public void testPayWhenNothingScanned2() throws DisabledException{
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+		}));
+		
+		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
+		
+		try {
+			payment.PayBanknote(new Banknote(5, getCurrency())); // pay with banknote
+		}
+		catch(SimulationException ex) { return; }
+		
+		fail("Expected SimulationException");
+	}
+	
 	/**
 	 * Paying with an invalid coin / banknote should not affect total
 	 */
@@ -178,7 +245,7 @@ public class CustomerPaymentTest {
 	 * @throws DisabledException 
 	 */
 	@Test
-	public void testOverPayment() throws DisabledException {
+	public void testOverPayment1() throws DisabledException {
 		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
 				newProduct("01234", 1.0)
 		}));
@@ -186,7 +253,19 @@ public class CustomerPaymentTest {
 		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
 		payment.PayBanknote(new Banknote(5, getCurrency())); // pay with banknote
 		
-		assertTrue(payment.getTotal() >= 0);
+		assertEquals(payment.getTotal() >= 0, true);
+	}
+	
+	@Test
+	public void testOverPayment2() throws DisabledException {
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+				newProduct("01234", 1.0)
+		}));
+		
+		CustomerPayment payment = new CustomerPayment(scannedProducts, station);
+		payment.PayCoin(new Coin(BigDecimal.valueOf(2.00), getCurrency())); //pay with coin
+		
+		assertEquals(payment.getTotal() >= 0, true);
 	}
 	
 	/**
@@ -283,20 +362,35 @@ public class CustomerPaymentTest {
 	 * For full coverage
 	 */
 	@Test
-	public void testOnErrorIfNull() {
+	public void testOnErrorIfNull() throws DisabledException{
 		try {
 			new CustomerPayment(null, station);
-			fail();
-		} catch (SimulationException e) {
-			// expected
-		}
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/ }
 		
 		try {
 			new CustomerPayment(new ArrayList<BarcodedProduct>(), null);
-			fail();
-		} catch (SimulationException e) {
-			// expected
-		}
+			fail("Should throw SimulationException if constructor parameter is null");
+		} catch (SimulationException e) {/*expected*/}
+		
+		ArrayList<BarcodedProduct> scannedProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
+				newProduct("01234", 15.2)
+		}));
+		CustomerPayment customerPayment = new CustomerPayment(scannedProducts, station);
+		try {
+			customerPayment.PayBanknote(null);
+			fail("Should throw SimulationException if PayBanknote parameter is null");
+		} catch (SimulationException e) {/*expected*/}
+		
+		try {
+			customerPayment.PayCoin(null);;
+			fail("Should throw SimulationException if PayCoin parameter is null");
+		} catch (SimulationException e) {/*expected*/}
+		
+		try {
+			customerPayment.updateScannedProducts(null);
+			fail("Should throw SimulationException if updateScannedProducts parameter is null");
+		} catch (SimulationException e) {/*expected*/}
 	}
 	
 	

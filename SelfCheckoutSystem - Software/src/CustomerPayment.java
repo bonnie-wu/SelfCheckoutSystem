@@ -37,6 +37,7 @@ public class CustomerPayment {
 	//Global variables
 	private ArrayList<BarcodedProduct> scannedItems;
 	private float total;
+	private float change;
 	private SelfCheckoutStation station;
 	
 	
@@ -115,6 +116,9 @@ public class CustomerPayment {
 	public void PayCoin(Coin coin) throws DisabledException{
 		coinPaid = false;
 		
+		if(total <= 0)
+			throw new SimulationException("Total amount owed is less than or equal to 0");
+		
 		if(coin == null) {
 			throw new SimulationException("Coin is null");
 		}
@@ -128,6 +132,12 @@ public class CustomerPayment {
 		
 		if(coinPaid)
 			total -= coin.getValue().floatValue();
+		
+		if(total <= 0) {
+			change = Math.abs(total);
+			total = 0;
+		}
+		
 	}
 	
 	/**
@@ -140,6 +150,9 @@ public class CustomerPayment {
 	 */
 	public void PayBanknote(Banknote banknote) throws DisabledException{
 		banknotePaid = false;
+		
+		if(total <= 0)
+			throw new SimulationException("Total amount owed is less than or equal to 0");
 		
 		if(banknote == null) {
 			throw new SimulationException("Banknote is null");
@@ -154,6 +167,11 @@ public class CustomerPayment {
 		
 		if(banknotePaid)
 			total -= banknote.getValue();
+		
+		if(total <= 0) {
+			change = Math.abs(total);
+			total = 0;
+		}
 	}
 	
 	
@@ -166,14 +184,6 @@ public class CustomerPayment {
 	}
 	
 	/**
-	 * Setter for the total
-	 * @param newTotal, type float of the new total
-	 */
-	public void setTotal(float newTotal) {
-		total = newTotal;
-	}
-	
-	/**
 	 * Method to update new scanned products and calculate the new total
 	 * @param scannedProducts ArrayList of barcoded products of scanned products
 	 */
@@ -183,5 +193,6 @@ public class CustomerPayment {
 		
 		scannedItems = scannedProducts;
 		total();
+		change = 0;
 	}
 }
