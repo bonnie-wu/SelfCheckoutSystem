@@ -93,7 +93,9 @@ public class SoftwareMainTest {
 				newProduct("01234", 4.50)
 		}));
 		
-		SoftwareMain main = new SoftwareMain(station, new ArrayList<>());
+		SoftwareMain main = new SoftwareMain(station, new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				newItem("01234", 10)
+		})));
 		main.populateDatabase(databaseProducts);
 		
 		try {
@@ -119,7 +121,9 @@ public class SoftwareMainTest {
 				newProduct("1337", 100)
 		}));
 		
-		SoftwareMain main = new SoftwareMain(station, new ArrayList<>());
+		SoftwareMain main = new SoftwareMain(station, new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				newItem("01234", 10)
+		})));
 		main.populateDatabase(databaseProducts);
 		
 		BarcodedItem item1 = newItem("01234", 5);
@@ -139,7 +143,7 @@ public class SoftwareMainTest {
 		main.Pay(new Coin(BigDecimal.valueOf(2.0), Currency.getInstance(Locale.CANADA)));
 		
 		// verify that it's correct
-		assertEquals((4.50+100)-2.0, main.customerPayment.getTotal(), 0.000001);
+		assertEquals(4.50+(4.50+100)-2.0, main.customerPayment.getTotal(), 0.000001);
 	}
 	
 	/**
@@ -158,7 +162,9 @@ public class SoftwareMainTest {
 				newProduct("1337", 100)
 		}));
 		
-		SoftwareMain main = new SoftwareMain(station, new ArrayList<>());
+		SoftwareMain main = new SoftwareMain(station, new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				newItem("01234", 10)
+		})));
 		main.populateDatabase(databaseProducts);
 		BarcodedItem item1 = newItem("01234", 5);
 		BarcodedItem item2 = newItem("1337", 5);
@@ -196,10 +202,12 @@ public class SoftwareMainTest {
 	@Test
 	public void testCannotScanAfterPayingWithBanknote() {
 		ArrayList<BarcodedProduct> databaseProducts = new ArrayList<>(Arrays.asList(new BarcodedProduct[] {
-				newProduct("01234", 4.50)
+				newProduct("01234", 5.0)
 		}));
 		
-		SoftwareMain main = new SoftwareMain(station, new ArrayList<>());
+		SoftwareMain main = new SoftwareMain(station, new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				newItem("01234", 10)
+		})));
 		main.populateDatabase(databaseProducts);
 		
 		// Scan, then pay
@@ -214,7 +222,7 @@ public class SoftwareMainTest {
 		} catch (Exception e){ /* expected */ }
 		
 		// Verify nothing changed
-		assertEquals(0, main.customerPayment.getTotal(), 0.0001);
+		assertEquals(5.0, main.customerPayment.getTotal(), 0.0001);
 	}
 	
 	/**
@@ -226,7 +234,9 @@ public class SoftwareMainTest {
 				newProduct("01234", 4.50)
 		}));
 		
-		SoftwareMain main = new SoftwareMain(station, new ArrayList<>());
+		SoftwareMain main = new SoftwareMain(station, new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				newItem("01234", 10)
+		})));
 		main.populateDatabase(databaseProducts);
 		
 		// Scan, then pay
@@ -241,7 +251,7 @@ public class SoftwareMainTest {
 		} catch (Exception e){ /* expected */ }
 		
 		// Verify nothing changed
-		assertEquals(0, main.customerPayment.getTotal(), 0.0001);
+		assertEquals(7.0, main.customerPayment.getTotal(), 0.0001);
 	}
 	
 	/**
