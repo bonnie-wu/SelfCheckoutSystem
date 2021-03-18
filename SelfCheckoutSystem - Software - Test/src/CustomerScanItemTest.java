@@ -309,6 +309,104 @@ public class CustomerScanItemTest {
 		} catch (SimulationException e) { station.baggingArea.enable(); }
 	}
 	
+	@Test
+	public void testScannerDisabled() throws OverloadException{
+		try {
+			station.mainScanner.disable();
+			customerScan.scanItemMain(newBarcodedItem("01234", 1.0));
+			fail("Should throw SimulationException if trying to scan when main scanner is disabled");
+		} catch (SimulationException e) { station.mainScanner.enable(); }
+		
+		try {
+			station.handheldScanner.disable();
+			customerScan.scanItemHeld(newBarcodedItem("01234", 1.0));
+			fail("Should throw SimulationException if trying to scan when hand held scanner is disabled");
+		} catch (SimulationException e) { station.handheldScanner.enable(); }
+		
+		try {
+			BarcodedItem item1 = newBarcodedItem("01234", 1.0);
+			station.baggingArea.disable();
+			customerScan.scanItemHeld(item1);
+			customerScan.placeItemInBagging(item1);
+			fail("Should throw SimulationException if trying to place item in bagging when bagging scale is disabled");
+		} catch (SimulationException e) { station.baggingArea.enable(); }
+	}
+	
+	@Test
+	public void testRemoveUnscannedItem() throws SimulationException{
+		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
+		BarcodedItem item2 = newBarcodedItem("01244", 1.0);
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				item1
+		}));
+		
+		CustomerScanItem customerScanItem = 
+		new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, scannedItems);
+
+		try {
+		customerScanItem.removeScannedItem(item2);
+		fail("Should throw SimulationException if trying to remove an item that was never scanned");
+		}
+		catch(SimulationException e) {/* Expected */};
+	}
+	
+	@Test
+	public void testRemoveScannedItem() throws SimulationException{
+		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				item1
+		}));
+		
+		CustomerScanItem customerScanItem = 
+		new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, scannedItems);
+
+		try {
+		customerScanItem.removeScannedItem(item1);
+		}
+		catch(SimulationException e) {/* Expected */};
+		assertEquals(0, customerScanItem.getScannedItems().size());
+	}
+	
+	@Test
+	public void testRemoveBaggedItemDisabled() throws OverloadException{
+		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				item1
+		}));
+		
+		CustomerScanItem customerScanItem = 
+		new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, scannedItems);
+		
+		customerScanItem.placeItemInBagging(item1);
+		station.baggingArea.disable();
+		
+		try {
+		customerScanItem.removeItemFromBagging(item1);
+		fail("Should throw SimulationException if bagging area is disabled");
+		}
+		catch(SimulationException e) {/* Expected */};
+		
+	}
+	
+	@Test
+	public void testRemoveBaggedItem() throws OverloadException{
+		BarcodedItem item1 = newBarcodedItem("01234", 1.0);
+		ArrayList<BarcodedItem> scannedItems = new ArrayList<>(Arrays.asList(new BarcodedItem[] {
+				item1
+		}));
+		
+		CustomerScanItem customerScanItem = 
+		new CustomerScanItem(station.mainScanner, station.handheldScanner, station.baggingArea, scannedItems);
+		
+		customerScanItem.placeItemInBagging(item1);
+		
+		try {
+		customerScanItem.removeItemFromBagging(item1);
+		}
+		catch(SimulationException e) {/* Expected */};
+		assertEquals(0.0, station.baggingArea.getCurrentWeight(), 0.001);
+	}
+	
 	private BarcodedItem newBarcodedItem(String barcode, double weight) {
 		return new BarcodedItem(new Barcode(barcode), weight);
 	}
